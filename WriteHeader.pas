@@ -5,15 +5,15 @@ interface
 uses System.Classes;
 
 {$INCLUDE spWav}
-function waveHeaderWrite(fp: TFileStream; sizeOfData: integer; ch: Word;
-  sampRate: Cardinal; sampBits: Word): integer;
+function waveHeaderWrite(fp: TFileStream; sizeOfData: LongInt; ch: Word;
+  sampRate: LongWord; sampBits: Word): LongInt;
 
 implementation
 
-function waveHeaderWrite(fp: TFileStream; sizeOfData: integer; ch: Word;
-  sampRate: Cardinal; sampBits: Word): integer;
+function waveHeaderWrite(fp: TFileStream; sizeOfData: LongInt; ch: Word;
+  sampRate: LongWord; sampBits: Word): LongInt;
 var
-  bytes: SmallInt;
+  bytes: Word;
   wrWavHdr: WrSWaveFileHeader;
   s: tWaveFormatPCM;
 begin

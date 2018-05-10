@@ -68,7 +68,7 @@ begin
     result := effect16BitWav(fpIn, fpOut, sizeOfData);
 end;
 
-function wavWrite(inFile, outFile: PChar; sampRate: Cardinal; sampBits: Word;
+function wavWrite(inFile, outFile: PChar; sampRate: LongWord; sampBits: Word;
   posOfData, sizeOfData: integer): integer;
 var
   bytesPerSingleCh: Word;
@@ -97,16 +97,18 @@ begin
     begin
       result := -1;
       Write('ÉGÉâÅ[î≠ê∂');
+      Exit;
     end;
   finally
     fpIn.Free;
     fpOut.Free;
   end;
+  result:=0;
 end;
 
 var
   sampRate, sampBits: SmallInt;
-  posOfData, sizeOfData: Cardinal;
+  posOfData, sizeOfData: LongWord;
 
 begin
   try
