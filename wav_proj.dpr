@@ -9,7 +9,7 @@ uses
   wav in 'wav.pas',
   WriteHeader in 'WriteHeader.pas';
 
-function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: SmallInt): integer;
+function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: Word): integer;
 var
   i: integer;
   s: Single;
@@ -33,7 +33,7 @@ begin
   end;
 end;
 
-function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: SmallInt)
+function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: integer)
   : integer;
 var
   i: integer;
