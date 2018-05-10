@@ -4,14 +4,16 @@ program wav_proj;
 {$R *.res}
 
 uses
-  System.SysUtils, System.Classes,
-  wav in 'wav.pas';
+  System.SysUtils,
+  System.Classes,
+  wav in 'wav.pas',
+  WriteHeader in 'WriteHeader.pas';
 
-function dump8BitWav(fpIn: TFileStream; sizeOfData: SmallInt): integer;
+function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: SmallInt): integer;
 var
   i: integer;
   s: Single;
-  c: array [0 .. 1] of ShortInt;
+  c: array [0 .. 1] of Word;
 begin
   result := 0;
   i := 0;
@@ -20,16 +22,19 @@ begin
   begin
     try
       fpIn.ReadBuffer(c, SizeOf(c));
+      c[0] := 128;
+      fpOut.WriteBuffer(c, SizeOf(c));
     except
       result := -1;
       break;
     end;
-    Writeln(c[0],',',c[1]);
+    Writeln(c[0], ',', c[1]);
     inc(i);
   end;
 end;
 
-function dump16BitWav(fpIn: TFileStream; sizeOfData: SmallInt): integer;
+function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: SmallInt)
+  : integer;
 var
   i: integer;
   s: Single;
@@ -42,49 +47,61 @@ begin
   begin
     try
       fpIn.ReadBuffer(c, SizeOf(c));
+      c[0] := 0;
+      fpOut.WriteBuffer(c, SizeOf(c));
     except
       result := -1;
       break;
     end;
-    Writeln(c[0],',',c[1]);
+    Writeln(c[0], ',', c[1]);
     inc(i);
   end;
 end;
 
-function dumpDataSub(fpIn: TFileStream; posOfData, sizeOfData: integer;
-  bytesPerSingleCh: SmallInt): SmallInt;
+function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: integer;
+  bytesPerSingleCh: SmallInt): integer;
 begin
   fpIn.Seek(posOfData, soFromCurrent);
   if bytesPerSingleCh = 1 then
-    result := dump8BitWav(fpIn, sizeOfData)
+    result := effect8BitWav(fpIn, fpOut, sizeOfData)
   else
-    result := dump16BitWav(fpIn, sizeOfData);
+    result := effect16BitWav(fpIn, fpOut, sizeOfData);
 end;
 
-function dumpData(inFile: PChar; sampBits, posOfData, sizeOfData: SmallInt)
-  : SmallInt;
+function wavWrite(inFile, outFile: PChar; sampRate: Cardinal; sampBits: Word;
+  posOfData, sizeOfData: integer): integer;
 var
-  bytesPerSingleCh: SmallInt;
-  fpIn: TFileStream;
+  bytesPerSingleCh: Word;
+  fpIn, fpOut: TFileStream;
 begin
-  result := -1;
-  bytesPerSingleCh := sampBits div 8;
-  if FileExists(inFile) = false then
-  begin
-    Writeln('オープンできません.');
-    Exit;
-  end;
-  fpIn := TFileStream.Create(inFile, fmOpenRead);
   try
-    if dumpDataSub(fpIn, posOfData, sizeOfData, bytesPerSingleCh) <> 0 then
+    if FileExists(inFile) = true then
+      fpIn := TFileStream.Create(inFile, fmOpenRead)
+    else
     begin
-      Writeln('エラー発生.');
+      result := -1;
+      Writeln(inFile, 'をオープンできません');
       Exit;
+    end;
+    fpOut := TFileStream.Create(outFile, fmCreate);
+    bytesPerSingleCh := sampBits div 8;
+    if waveHeaderWrite(fpOut, sizeOfData, bytesPerSingleCh, sampRate, sampBits)
+      = -1 then
+    begin
+      result := -1;
+      Writeln('ヘッダを書き込めません');
+      Exit;
+    end;
+    if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
+    then
+    begin
+      result := -1;
+      Write('エラー発生');
     end;
   finally
     fpIn.Free;
+    fpOut.Free;
   end;
-  result := 0;
 end;
 
 var
@@ -94,14 +111,9 @@ var
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    if ParamCount <> 1 then
-    begin
-      Writeln('wav ファイルをダンプします.'#13#10, '引数に <入力ファイル名> を指定してください.'#13#10#13#10,
-        '例 : dumpWav  in.wav');
-      Exit;
-    end;
     wavHdrRead(PChar(ParamStr(1)), sampRate, sampBits, posOfData, sizeOfData);
-    dumpData(PChar(ParamStr(1)), sampBits, posOfData, sizeOfData);
+    wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sampRate, sampBits,
+      posOfData, sizeOfData);
     Writeln('完了');
   except
     on E: Exception do

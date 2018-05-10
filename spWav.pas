@@ -20,6 +20,17 @@ type
     bitsPerSample: Word;
   end;
 
+  WrSWaveFileHeader = record
+    hdrRiff: array [0..3] of AnsiChar;
+    sizeOfFile: Cardinal;
+    stWaveFormat: tWaveFormatPCM;
+    hdrWave: array [0..3] of AnsiChar;
+    hdrFmt: array [0..3] of AnsiChar;
+    sizeOfFmt: Cardinal;
+    hdrData: array [0..3] of AnsiChar;
+    sizeOfData: Cardinal;
+  end;
+
 const
   STR_RIFF = 'RIFF';
   STR_WAVE = 'WAVE';

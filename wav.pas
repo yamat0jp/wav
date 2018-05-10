@@ -5,7 +5,8 @@ interface
 uses
   System.Classes, System.SysUtils;
 
-{$INCLUDE spWave}
+{$INCLUDE spWav}
+
 function readFmtChank(fp: TFileStream; waveFmtPcm: tWaveFormatPcm): integer;
 function wavHdrRead(wavefile: PChar; var sampRate, sampBits: SmallInt;
   var posOfData, sizeOfData: Cardinal): integer;
@@ -97,7 +98,7 @@ begin
       sizeOfData := chank.sizeOfFmtData;
       Writeln('data‚Ì’·‚³:', sizeOfData, '[bytes]');
       posOfData := fp.Position;
-      fp.Seek(sizeOfData - 4, soFromCurrent);
+      fp.Seek(sizeOfData - 4, soCurrent);
       break;
     end
     else
