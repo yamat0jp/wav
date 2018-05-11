@@ -28,12 +28,12 @@ begin
       result := -1;
       break;
     end;
-    Writeln(c[0], ',', c[1]);
+    Writeln(c[0], ' : ', c[1]);
     inc(i);
   end;
 end;
 
-function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: integer)
+function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: Word)
   : integer;
 var
   i: integer;
@@ -53,7 +53,7 @@ begin
       result := -1;
       break;
     end;
-    Writeln(c[0], ',', c[1]);
+    Writeln(c[0], ' : ', c[1]);
     inc(i);
   end;
 end;
