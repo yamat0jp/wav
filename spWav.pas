@@ -12,23 +12,23 @@ type
   end;
 
   tWaveFormatPcm = record
-    formatTag: Word;
-    channels: Word;
-    sampleParSec: LongInt;
-    bytesPerSec: LongInt;
-    blockAlign: Word;
-    bitsPerSample: Word;
+    formatTag: Byte;
+    channels: Byte;
+    sampleParSec: LongWord;
+    bytesPerSec: LongWord;
+    blockAlign: Byte;
+    bitsPerSample: Byte;
   end;
 
   WrSWaveFileHeader = record
     hdrRiff: array [0..3] of AnsiChar;
-    sizeOfFile: LongInt;
+    sizeOfFile: LongWord;
     stWaveFormat: tWaveFormatPCM;
     hdrWave: array [0..3] of AnsiChar;
     hdrFmt: array [0..3] of AnsiChar;
-    sizeOfFmt: LongInt;
+    sizeOfFmt: LongWord;
     hdrData: array [0..3] of AnsiChar;
-    sizeOfData: LongInt;
+    sizeOfData: LongWord;
   end;
 
 const
