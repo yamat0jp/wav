@@ -33,8 +33,7 @@ begin
   end;
 end;
 
-function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt)
-  : integer;
+function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt): integer;
 var
   i: integer;
   s: Single;
@@ -58,9 +57,10 @@ begin
   end;
 end;
 
-function wavDataWrite(fpIn, fpOut: TFileStream; sizeOfData: LongInt;
+function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: LongInt;
   bytesPerSingleCh: SmallInt): integer;
 begin
+  fpOut.Position := posOfData;
   if bytesPerSingleCh = 1 then
     result := effect8BitWav(fpIn, fpOut, sizeOfData)
   else
@@ -68,7 +68,7 @@ begin
 end;
 
 function wavWrite(inFile, outFile: PChar; sampRate: LongWord; sampBits: Byte;
-  sizeOfData: LongInt): integer;
+  posOfData, sizeOfData: LongInt): integer;
 var
   bytesPerSingleCh: Word;
   fpIn, fpOut: TFileStream;
@@ -84,14 +84,14 @@ begin
     end;
     fpOut := TFileStream.Create(outFile, fmCreate);
     bytesPerSingleCh := sampBits div 8;
-    if waveHeaderWrite(fpOut, sizeOfData, bytesPerSingleCh, sampRate, sampBits)
-      = -1 then
+    if waveHeaderWrite(fpOut, sizeOfData, bytesPerSingleCh, sampRate,
+      sampBits) = -1 then
     begin
       result := -1;
       Writeln('ヘッダを書き込めません');
       Exit;
     end;
-    if wavDataWrite(fpIn, fpOut, sizeOfData, bytesPerSingleCh) = -1
+    if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
     then
     begin
       result := -1;
@@ -102,20 +102,20 @@ begin
     fpIn.Free;
     fpOut.Free;
   end;
-  result:=0;
+  result := 0;
 end;
 
 var
   sampRate: LongWord;
   sampBits: Byte;
-  sizeOfData: LongInt;
+  posOfData, sizeOfData: LongInt;
 
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    wavHdrRead(PChar(ParamStr(1)), sampRate, sampBits, sizeOfData);
+    wavHdrRead(PChar(ParamStr(1)), sampRate, sampBits, posOfData, sizeOfData);
     wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sampRate, sampBits,
-      sizeOfData);
+      posOfData, sizeOfData);
     Writeln('完了');
   except
     on E: Exception do

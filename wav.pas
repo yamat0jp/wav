@@ -23,6 +23,24 @@ begin
     Writeln('バイト数　/　秒：', waveFmtPcm.bytesPerSec);
     Writeln('バイト数 Ｘチャンネル数：', waveFmtPcm.blockAlign);
     Writeln('ビット数　/　サンプル：', waveFmtPcm.bitsPerSample);
+    if waveFmtPcm.channels <> 2 then
+    begin
+      Writeln('ステレオファイルを対象としています');
+      Writeln('チャンネル数は',waveFmtPcm.channels);
+      result:=-1;
+    end;
+    if waveFmtPcm.formatTag <> 1 then
+    begin
+      Writeln('無圧縮のPCMのみ対象');
+      Writeln('フォーマット形式は',waveFmtPcm.formatTag);
+      result:=-1;
+    end;
+    if (waveFmtPcm.bitsPerSample <> 8)and(waveFmtPcm.bitsPerSample <> 16) then
+    begin
+      Writeln('8/16ビットのみ対象');
+      Writeln('bit/secは',waveFmtPcm.bitsPerSample);
+      result:=-1;
+    end;
   except
     on EReadError do
       result := -1;
