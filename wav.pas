@@ -6,13 +6,13 @@ uses
   System.Classes, System.SysUtils;
 
 {$INCLUDE spWav}
-function readFmtChank(fp: TFileStream; waveFmtPcm: tWaveFormatPcm): integer;
+function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
 function wavHdrRead(wavefile: PChar; var sampRate: LongWord; var sampBits: Byte;
   var posOfData, sizeOfData: LongInt): integer;
 
 implementation
 
-function readFmtChank(fp: TFileStream; waveFmtPcm: tWaveFormatPcm): integer;
+function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
 begin
   result := 0;
   try
@@ -23,23 +23,26 @@ begin
     Writeln('バイト数　/　秒：', waveFmtPcm.bytesPerSec);
     Writeln('バイト数 Ｘチャンネル数：', waveFmtPcm.blockAlign);
     Writeln('ビット数　/　サンプル：', waveFmtPcm.bitsPerSample);
-    if waveFmtPcm.channels <> 2 then
+    with waveFmtPcm do
     begin
-      Writeln('ステレオファイルを対象としています');
-      Writeln('チャンネル数は', waveFmtPcm.channels);
-      result := -1;
-    end;
-    if waveFmtPcm.formatTag <> 1 then
-    begin
-      Writeln('無圧縮のPCMのみ対象');
-      Writeln('フォーマット形式は', waveFmtPcm.formatTag);
-      result := -1;
-    end;
-    if (waveFmtPcm.bitsPerSample <> 8) and (waveFmtPcm.bitsPerSample <> 16) then
-    begin
-      Writeln('8/16ビットのみ対象');
-      Writeln('bit/secは', waveFmtPcm.bitsPerSample);
-      result := -1;
+      if channels <> 2 then
+      begin
+        Writeln('ステレオファイルを対象としています');
+        Writeln('チャンネル数は', channels);
+        result := -1;
+      end;
+      if formatTag <> 1 then
+      begin
+        Writeln('無圧縮のPCMのみ対象');
+        Writeln('フォーマット形式は', formatTag);
+        result := -1;
+      end;
+      if (bitsPerSample <> 8) and (bitsPerSample <> 16) then
+      begin
+        Writeln('8/16ビットのみ対象');
+        Writeln('bit/secは', bitsPerSample);
+        result := -1;
+      end;
     end;
   except
     on EReadError do
@@ -85,6 +88,8 @@ begin
     fp.Free;
     Exit;
   end;
+  fPos := 0;
+  len := 0;
   while True do
   begin
     try
@@ -97,8 +102,6 @@ begin
         break;
       end;
     end;
-    fPos:=0;
-    len:=0;
     if CompareStr(chank.hdrFmtData, STR_fmt) = 0 then
     begin
       len := chank.sizeOfFmtData;
