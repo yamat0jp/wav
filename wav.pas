@@ -31,7 +31,7 @@ begin
 end;
 
 function wavHdrRead(wavefile: PChar; var sampRate, sampBits: SmallInt;
-  var posOfData, sizeOfData: Cardinal): integer;
+  var posOfData, sizeOfData: LongWord): integer;
 var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;

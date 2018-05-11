@@ -13,7 +13,7 @@ function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: Word): integer;
 var
   i: integer;
   s: Single;
-  c: array [0 .. 1] of Word;
+  c: array [0 .. 1] of Byte;
 begin
   result := 0;
   i := 0;
@@ -38,7 +38,7 @@ function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: integer)
 var
   i: integer;
   s: Single;
-  c: array [0 .. 1] of SmallInt;
+  c: array [0 .. 1] of ShortInt;
 begin
   result := 0;
   i := 0;
@@ -58,7 +58,7 @@ begin
   end;
 end;
 
-function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: integer;
+function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: LongInt;
   bytesPerSingleCh: SmallInt): integer;
 begin
   fpIn.Seek(posOfData, soFromCurrent);
