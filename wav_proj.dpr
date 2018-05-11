@@ -60,6 +60,7 @@ end;
 function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: LongInt;
   bytesPerSingleCh: SmallInt): integer;
 begin
+  fpIn.Position := posOfData;
   fpOut.Position := posOfData;
   if bytesPerSingleCh = 1 then
     result := effect8BitWav(fpIn, fpOut, sizeOfData)
@@ -74,33 +75,27 @@ var
   fpIn, fpOut: TFileStream;
 begin
   try
-    if FileExists(inFile) = true then
-      fpIn := TFileStream.Create(inFile, fmOpenRead)
-    else
-    begin
-      result := -1;
-      Writeln(inFile, 'をオープンできません');
-      Exit;
-    end;
+    fpIn := TFileStream.Create(inFile, fmOpenRead);
     fpOut := TFileStream.Create(outFile, fmCreate);
     bytesPerSingleCh := sampBits div 8;
     if waveHeaderWrite(fpOut, sizeOfData, bytesPerSingleCh, sampRate,
       sampBits) = -1 then
-    begin
-      result := -1;
-      Writeln('ヘッダを書き込めません');
-      Exit;
-    end;
+      raise EWriteError.Create('ヘッダを書き込めません');
     if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
     then
+      raise EWriteError.Create('エラー発生');
+  except
+    on EFOpenError do
+      Writeln(inFile, 'をオープンできません');
+    on EFOpenError do
+      fpIn.Free;
+    else
+
     begin
-      result := -1;
-      Write('エラー発生');
-      Exit;
+      fpIn.Free;
+      fpOut.Free;
     end;
-  finally
-    fpIn.Free;
-    fpOut.Free;
+    result := -1;
   end;
   result := 0;
 end;

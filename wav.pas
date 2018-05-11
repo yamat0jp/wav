@@ -97,6 +97,8 @@ begin
         break;
       end;
     end;
+    fPos:=0;
+    len:=0;
     if CompareStr(chank.hdrFmtData, STR_fmt) = 0 then
     begin
       len := chank.sizeOfFmtData;
