@@ -107,8 +107,9 @@ begin
 end;
 
 var
-  sampRate, sampBits: SmallInt;
-  posOfData, sizeOfData: LongWord;
+  sampRate: LongWord;
+  sampBits: Byte;
+  posOfData, sizeOfData: LongInt;
 
 begin
   try

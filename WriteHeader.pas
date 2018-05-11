@@ -13,7 +13,7 @@ implementation
 function waveHeaderWrite(fp: TFileStream; sizeOfData: LongInt; ch: Byte;
   sampRate: LongWord; sampBits: Byte): integer;
 var
-  bytes: Word;
+  bytes: Byte;
   wrWavHdr: WrSWaveFileHeader;
   s: tWaveFormatPCM;
 begin
@@ -22,7 +22,6 @@ begin
   wrWavHdr.hdrWave := STR_WAVE;
   wrWavHdr.hdrFmt := STR_fmt;
   wrWavHdr.sizeOfFmt := SizeOf(tWaveFormatPCM);
-  wrWavHdr.stWaveFormat := s;
   s.formatTag := 1;
   s.channels := ch;
   s.sampleParSec := sampRate;
@@ -30,6 +29,7 @@ begin
   s.bytesPerSec := bytes * ch * sampRate;
   s.blockAlign := bytes * ch;
   s.bytesPerSec := sampBits;
+  wrWavHdr.stWaveFormat := s;
   wrWavHdr.hdrData := STR_data;
   wrWavHdr.sizeOfData := sizeOfData;
   fp.WriteBuffer(wrWavHdr, SizeOf(WrSWaveFileHeader));

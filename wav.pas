@@ -6,10 +6,9 @@ uses
   System.Classes, System.SysUtils;
 
 {$INCLUDE spWav}
-
 function readFmtChank(fp: TFileStream; waveFmtPcm: tWaveFormatPcm): integer;
-function wavHdrRead(wavefile: PChar; var sampRate, sampBits: SmallInt;
-  var posOfData, sizeOfData: Cardinal): integer;
+function wavHdrRead(wavefile: PChar; var sampRate: LongWord; var sampBits: Byte;
+  var posOfData, sizeOfData: LongInt): integer;
 
 implementation
 
@@ -30,8 +29,8 @@ begin
   end;
 end;
 
-function wavHdrRead(wavefile: PChar; var sampRate, sampBits: SmallInt;
-  var posOfData, sizeOfData: LongWord): integer;
+function wavHdrRead(wavefile: PChar; var sampRate: LongWord; var sampBits: Byte;
+  var posOfData, sizeOfData: LongInt): integer;
 var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;
