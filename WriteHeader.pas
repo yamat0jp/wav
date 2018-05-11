@@ -28,12 +28,12 @@ begin
   bytes := sampBits div 8;
   s.bytesPerSec := bytes * ch * sampRate;
   s.blockAlign := bytes * ch;
-  s.bytesPerSec := sampBits;
+  s.bitsPerSample := sampBits;
   wrWavHdr.stWaveFormat := s;
   wrWavHdr.hdrData := STR_data;
   wrWavHdr.sizeOfData := sizeOfData;
   fp.WriteBuffer(wrWavHdr, SizeOf(WrSWaveFileHeader));
-  result:=fp.Position;
+  result := fp.Position;
 end;
 
 end.

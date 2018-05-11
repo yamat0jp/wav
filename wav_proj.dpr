@@ -9,7 +9,7 @@ uses
   wav in 'wav.pas',
   WriteHeader in 'WriteHeader.pas';
 
-function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: Word): integer;
+function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt): integer;
 var
   i: integer;
   s: Single;
@@ -33,7 +33,7 @@ begin
   end;
 end;
 
-function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: Word)
+function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt)
   : integer;
 var
   i: integer;
@@ -58,18 +58,17 @@ begin
   end;
 end;
 
-function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: LongInt;
+function wavDataWrite(fpIn, fpOut: TFileStream; sizeOfData: LongInt;
   bytesPerSingleCh: SmallInt): integer;
 begin
-  fpIn.Seek(posOfData, soFromCurrent);
   if bytesPerSingleCh = 1 then
     result := effect8BitWav(fpIn, fpOut, sizeOfData)
   else
     result := effect16BitWav(fpIn, fpOut, sizeOfData);
 end;
 
-function wavWrite(inFile, outFile: PChar; sampRate: LongWord; sampBits: Word;
-  posOfData, sizeOfData: integer): integer;
+function wavWrite(inFile, outFile: PChar; sampRate: LongWord; sampBits: Byte;
+  sizeOfData: LongInt): integer;
 var
   bytesPerSingleCh: Word;
   fpIn, fpOut: TFileStream;
@@ -92,7 +91,7 @@ begin
       Writeln('ヘッダを書き込めません');
       Exit;
     end;
-    if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
+    if wavDataWrite(fpIn, fpOut, sizeOfData, bytesPerSingleCh) = -1
     then
     begin
       result := -1;
@@ -109,14 +108,14 @@ end;
 var
   sampRate: LongWord;
   sampBits: Byte;
-  posOfData, sizeOfData: LongInt;
+  sizeOfData: LongInt;
 
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    wavHdrRead(PChar(ParamStr(1)), sampRate, sampBits, posOfData, sizeOfData);
+    wavHdrRead(PChar(ParamStr(1)), sampRate, sampBits, sizeOfData);
     wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sampRate, sampBits,
-      posOfData, sizeOfData);
+      sizeOfData);
     Writeln('完了');
   except
     on E: Exception do
