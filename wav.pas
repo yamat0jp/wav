@@ -26,20 +26,20 @@ begin
     if waveFmtPcm.channels <> 2 then
     begin
       Writeln('ステレオファイルを対象としています');
-      Writeln('チャンネル数は',waveFmtPcm.channels);
-      result:=-1;
+      Writeln('チャンネル数は', waveFmtPcm.channels);
+      result := -1;
     end;
     if waveFmtPcm.formatTag <> 1 then
     begin
       Writeln('無圧縮のPCMのみ対象');
-      Writeln('フォーマット形式は',waveFmtPcm.formatTag);
-      result:=-1;
+      Writeln('フォーマット形式は', waveFmtPcm.formatTag);
+      result := -1;
     end;
-    if (waveFmtPcm.bitsPerSample <> 8)and(waveFmtPcm.bitsPerSample <> 16) then
+    if (waveFmtPcm.bitsPerSample <> 8) and (waveFmtPcm.bitsPerSample <> 16) then
     begin
       Writeln('8/16ビットのみ対象');
-      Writeln('bit/secは',waveFmtPcm.bitsPerSample);
-      result:=-1;
+      Writeln('bit/secは', waveFmtPcm.bitsPerSample);
+      result := -1;
     end;
   except
     on EReadError do
@@ -53,7 +53,7 @@ var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;
   chank: tChank;
-  len: integer;
+  fPos, len: integer;
   fp: TFileStream;
 begin
   try
@@ -101,6 +101,7 @@ begin
     begin
       len := chank.sizeOfFmtData;
       Writeln('fmt の長さ', len, '[bytes]');
+      fPos := fp.Position;
       if readFmtChank(fp, waveFmtPcm) <> 0 then
       begin
         result := -1;
@@ -109,19 +110,21 @@ begin
       end;
       sampRate := waveFmtPcm.sampleParSec;
       sampBits := waveFmtPcm.bytesPerSec;
+      fp.Seek(fPos + len, soFromBeginning);
     end
     else if CompareStr(chank.hdrFmtData, STR_data) = 0 then
     begin
       sizeOfData := chank.sizeOfFmtData;
       Writeln('dataの長さ:', sizeOfData, '[bytes]');
       posOfData := fp.Position;
-      fp.Seek(sizeOfData - 4, soCurrent);
+      fp.Seek(fPos + len, soFromBeginning);
       break;
     end
     else
     begin
       len := chank.sizeOfFmtData;
       Writeln(chank.hdrFmtData, 'の長さ[bytes]', len);
+      fPos := fp.Position;
       fp.Seek(len, soFromCurrent);
     end;
   end;
