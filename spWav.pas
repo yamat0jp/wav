@@ -2,31 +2,31 @@
 type
   SWaveFileHeader = record
     hdrRiff: array [0 .. 3] of AnsiChar;
-    sizeOfFile: LongInt;
+    sizeOfFile: LongWord;
     hdrWave: array [0 .. 3] of AnsiChar;
   end;
 
   tChank = record
     hdrFmtData: array [0 .. 3] of AnsiChar;
-    sizeOfFmtData: LongInt;
+    sizeOfFmtData: LongWord;
   end;
 
   tWaveFormatPcm = record
-    formatTag: Byte;
-    channels: Byte;
+    formatTag: SmallInt;
+    channels: SmallInt;
     sampleParSec: LongWord;
     bytesPerSec: LongWord;
-    blockAlign: Byte;
-    bitsPerSample: Byte;
+    blockAlign: SmallInt;
+    bitsPerSample: SmallInt;
   end;
 
   WrSWaveFileHeader = record
     hdrRiff: array [0..3] of AnsiChar;
     sizeOfFile: LongWord;
-    stWaveFormat: tWaveFormatPCM;
     hdrWave: array [0..3] of AnsiChar;
     hdrFmt: array [0..3] of AnsiChar;
     sizeOfFmt: LongWord;
+    stWaveFormat: tWaveFormatPCM;
     hdrData: array [0..3] of AnsiChar;
     sizeOfData: LongWord;
   end;

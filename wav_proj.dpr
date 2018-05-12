@@ -79,7 +79,7 @@ begin
     fpOut := TFileStream.Create(outFile, fmCreate);
     bytesPerSingleCh := sampBits div 8;
     if waveHeaderWrite(fpOut, sizeOfData, bytesPerSingleCh, sampRate,
-      sampBits) = -1 then
+      sampBits) <> 44 then
       raise EWriteError.Create('ƒwƒbƒ_‚ğ‘‚«‚ß‚Ü‚¹‚ñ');
     if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
     then

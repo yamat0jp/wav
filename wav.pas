@@ -89,7 +89,7 @@ begin
     Exit;
   end;
   fPos := 0;
-  len := 0;
+  len := waveFileHeader.sizeOfFile;
   while True do
   begin
     try
@@ -130,7 +130,7 @@ begin
       len := chank.sizeOfFmtData;
       Writeln(chank.hdrFmtData, '‚Ì’·‚³[bytes]', len);
       fPos := fp.Position;
-      fp.Seek(len, soFromCurrent);
+      fp.Seek(len,soFromCurrent);
     end;
   end;
   fp.Free;
