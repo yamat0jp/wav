@@ -11,9 +11,10 @@ uses
 
 function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt): integer;
 var
-  i: integer;
+  i, j: integer;
   s: Single;
   c: array [0 .. 1] of Byte;
+  mix: Byte;
 begin
   result := 0;
   i := 0;
@@ -22,22 +23,23 @@ begin
   begin
     try
       fpIn.ReadBuffer(c, SizeOf(c));
-      c[0] := 128;
-      fpOut.WriteBuffer(c, SizeOf(c));
+      j:=(c[0]+c[1]) div 2;
+      mix:=j;
+      fpOut.WriteBuffer(mix, SizeOf(mix));
     except
       result := -1;
       break;
     end;
-    Writeln(c[0], ' : ', c[1]);
     inc(i);
   end;
 end;
 
 function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt): integer;
 var
-  i: integer;
+  i, j: integer;
   s: Single;
   c: array [0 .. 1] of ShortInt;
+  mix: LongInt;
 begin
   result := 0;
   i := 0;
@@ -46,13 +48,13 @@ begin
   begin
     try
       fpIn.ReadBuffer(c, SizeOf(c));
-      c[0] := 0;
-      fpOut.WriteBuffer(c, SizeOf(c));
+      j:=(c[0]+c[1]) div 2;
+      mix:=j;
+      fpOut.WriteBuffer(mix, SizeOf(mix));
     except
       result := -1;
       break;
     end;
-    Writeln(c[0], ' : ', c[1]);
     inc(i);
   end;
 end;

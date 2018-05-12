@@ -37,3 +37,6 @@ const
   STR_fmt = 'fmt ';
   STR_DATA = 'data';
   _MAX_PATH = 255;
+
+  WAV_MONAURAL = 1;
+  WAV_STEREO = 2;
