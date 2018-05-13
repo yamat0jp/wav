@@ -10,24 +10,6 @@ uses
   WriteHeader in 'WriteHeader.pas',
   spWav in 'spWav.pas';
 
-function cut(fpIn, fpOut: TFileStream; sp: SpParam): integer;
-var
-  Buffer: array of ShortInt;
-  size: integer;
-begin
-  result := 0;
-  size := (sp.endpos - sp.startpos + 1) * sp.channels * sp.samplePerSec *
-    sp.bitsPerSample div 8;
-  SetLength(Buffer, size);
-  try
-    fpIn.ReadBuffer(Pointer(Buffer)^, size);
-    fpOut.WriteBuffer(Pointer(Buffer)^, size);
-    Finalize(Buffer);
-  except
-    result := -1;
-  end;
-end;
-
 function checkRange(var sp: SpParam): integer;
 begin
   result := 0;
@@ -45,9 +27,28 @@ begin
 end;
 
 function wavDataWrite(fpIn, fpOut: TFileStream; const sp: SpParam): integer;
+var
+  Buffer: array of ShortInt;
 begin
+  result := 0;
   fpIn.Position := sp.posOfData;
-  result := cut(fpIn, fpOut, sp);
+  try
+    GetMem(Pointer(Buffer), sp.sizeOfData);
+  except
+    Writeln('メモリが確保できません');
+    result := -1;
+  end;
+  if fpIn.Read(Pointer(Buffer)^, sp.sizeOfData) = -1 then
+  begin
+    Writeln('読み込みに失敗');
+    result := -1;
+  end;
+  if fpOut.Write(Pointer(Buffer)^, sp.sizeOfData) = -1 then
+  begin
+    Writeln('書き込みに失敗');
+    result := -1;
+  end;
+  FreeMem(Pointer(Buffer));
 end;
 
 function wavWrite(inFile, outFile: PChar; var sp: SpParam): integer;
@@ -79,21 +80,25 @@ begin
   result := 0;
 end;
 
+procedure usage;
+begin
+  Writeln('引数<入力ファイル名><出力ファイル名><速度倍率>');
+end;
+
 var
   sp: SpParam;
 
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    sp.startpos := StrToInt(ParamStr(3));
-    sp.endpos := StrToInt(ParamStr(4));
-    if sp.startpos > sp.endpos then
+    if ParamCount <> 3 then
     begin
-      Writeln('開始秒は終了秒を超えてはなりません');
+      usage;
       Exit;
     end;
     if wavHdrRead(PChar(ParamStr(1)), sp) = -1 then
       Exit;
+    sp.samplePerSec := StrToInt(ParamStr(3)) * sp.samplePerSec;
     if wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sp) = -1 then
       Exit;
     Writeln('完了');
