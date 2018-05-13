@@ -5,7 +5,7 @@
         <FrameworkType>None</FrameworkType>
         <MainSource>wav_proj.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Console</AppType>
@@ -127,7 +127,7 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <Debugger_RunParams>effect.wav 100 2000</Debugger_RunParams>
+        <Debugger_RunParams>toujyo.wav effect.wav</Debugger_RunParams>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
@@ -149,6 +149,7 @@
         <DCCReference Include="spWav.pas"/>
         <DCCReference Include="effect.pas"/>
         <DCCReference Include="WriteHeader.pas"/>
+        <DCCReference Include="wav.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

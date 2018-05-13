@@ -46,24 +46,21 @@ begin
   pInMem := TMemoryStream.Create;
   pOutMem := TMemoryStream.Create;
   try
-    if pInMem.CopyFrom(fpIn, sp.sizeOfData) = -1 then
-    begin
-      result := -1;
-      Exit;
-    end;
+    pInMem.CopyFrom(fpIn, 0);
+    pOutMem.SetSize(pInMem.Size);
     if sp.bitsPerSample = 8 then
       result := effect8BitWav(pInMem, pOutMem, sp)
     else
       result := effect16BitWav(pInMem, pOutMem, sp);
-    if fpOut.CopyFrom(pOutMem, sp.sizeOfData) = 0 then
-    begin
+    fpOut.CopyFrom(pOutMem, 0);
+  except
+    on EReadError do
       result := -1;
-      Writeln('èëÇ´çûÇ›é∏îs');
-    end;
-  finally
-    pInMem.Free;
-    pOutMem.Free;
+    on EWriteError do
+      result := -1;
   end;
+  pInMem.Free;
+  pOutMem.Free;
 end;
 
 function wavWrite(inFile, outFile: PChar; const wHdr: WrSWaveFileHeader;
@@ -73,9 +70,8 @@ var
 begin
   result := 0;
   try
-    fpIn:=TFileStream.Create(inFile,fmOpenRead);
+    fpIn := TFileStream.Create(inFile, fmOpenRead);
     fpOut := TFileStream.Create(outFile, fmCreate);
-    fpOut.WriteBuffer(wHdr, SizeOf(WrSWaveFileHeader));
     if wavDataWrite(fpIn, fpOut, sp) = -1 then
       raise EWriteError.Create('');
   except
