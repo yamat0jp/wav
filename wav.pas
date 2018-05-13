@@ -3,9 +3,8 @@ unit wav;
 interface
 
 uses
-  System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils, spWav;
 
-{$INCLUDE spWav}
 function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
 function wavHdrRead(wavefile: PChar; var sp: SpParam): integer;
 
@@ -20,7 +19,7 @@ begin
     Writeln('チャンネル数：', waveFmtPcm.channels);
     Writeln('サンプリング周波数：', waveFmtPcm.sampleParSec);
     Writeln('バイト数　/　秒：', waveFmtPcm.bytesPerSec);
-    Writeln('バイト数 Ｘチャンネル数：', waveFmtPcm.blockAlign);
+    Writeln('バイト数 Ｘ チャンネル数：', waveFmtPcm.blockAlign);
     Writeln('ビット数　/　サンプル：', waveFmtPcm.bitsPerSample);
     with waveFmtPcm do
     begin
@@ -112,6 +111,8 @@ begin
         Exit;
       end;
       sp.samplePerSec := waveFmtPcm.sampleParSec;
+      sp.bitsPerSample := waveFmtPcm.bitsPerSample;
+      sp.channels := waveFmtPcm.channels;
       sp.bytesPerSec := waveFmtPcm.bytesPerSec;
       fp.Seek(fPos + len, soFromBeginning);
     end

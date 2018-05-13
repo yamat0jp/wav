@@ -2,14 +2,13 @@ unit WriteHeader;
 
 interface
 
-uses System.Classes;
+uses System.Classes, spWav;
 
-{$INCLUDE spWav}
-function waveHeaderWrite(fp: TFileStream; sp: SpParam): integer;
+function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
 
 implementation
 
-function waveHeaderWrite(fp: TFileStream; sp: SpParam): integer;
+function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
 var
   bytes: Byte;
   wrWavHdr: WrSWaveFileHeader;

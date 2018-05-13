@@ -1,3 +1,6 @@
+unit spWav;
+
+interface
 
 type
   SWaveFileHeader = record
@@ -50,3 +53,7 @@ const
 
   WAV_MONAURAL = 1;
   WAV_STEREO = 2;
+
+implementation
+
+end.

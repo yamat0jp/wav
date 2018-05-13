@@ -7,11 +7,24 @@ uses
   System.SysUtils,
   System.Classes,
   wav in 'wav.pas',
-  WriteHeader in 'WriteHeader.pas';
+  WriteHeader in 'WriteHeader.pas',
+  spWav in 'spWav.pas';
 
 function cut(fpIn, fpOut: TFileStream; sp: SpParam): integer;
+var
+  Buffer: array of ShortInt;
+  size: integer;
 begin
-
+  size := (sp.endpos - sp.startpos) * sp.channels * sp.samplePerSec *
+    sp.bitsPerSample div 8;
+  SetLength(Buffer, size);
+  try
+    fpIn.ReadBuffer(Pointer(Buffer)^, size);
+    fpOut.WriteBuffer(Pointer(Buffer)^, size);
+    Finalize(Buffer);
+  except
+    result := -1;
+  end;
 end;
 
 function checkRange(var sp: SpParam): integer;
@@ -30,14 +43,13 @@ begin
   end;
 end;
 
-function wavDataWrite(fpIn, fpOut: TFileStream; sp: SpParam): integer;
+function wavDataWrite(fpIn, fpOut: TFileStream; const sp: SpParam): integer;
 begin
   fpIn.Position := sp.posOfData;
- // fpOut.Position := sp.posOfData;
-  result:=cut(fpIn,fpOut,sp);
+  result := cut(fpIn, fpOut, sp);
 end;
 
-function wavWrite(inFile, outFile: PChar; sp: SpParam): integer;
+function wavWrite(inFile, outFile: PChar; var sp: SpParam): integer;
 var
   fpIn, fpOut: TFileStream;
 begin
@@ -72,8 +84,8 @@ var
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    sp.startpos := LongInt(ParamStr(3));
-    sp.endpos := LongInt(ParamStr(4));
+    sp.startpos := StrToInt(ParamStr(3));
+    sp.endpos := StrToInt(ParamStr(4));
     if sp.startpos > sp.endpos then
     begin
       Writeln('開始秒は終了秒を超えてはなりません');
