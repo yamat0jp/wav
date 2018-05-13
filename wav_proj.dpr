@@ -15,7 +15,8 @@ var
   Buffer: array of ShortInt;
   size: integer;
 begin
-  size := (sp.endpos - sp.startpos) * sp.channels * sp.samplePerSec *
+  result := 0;
+  size := (sp.endpos - sp.startpos + 1) * sp.channels * sp.samplePerSec *
     sp.bitsPerSample div 8;
   SetLength(Buffer, size);
   try
