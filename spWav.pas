@@ -41,7 +41,9 @@ type
     channels: Byte;
     bytesPerSec: LongWord;
     posOfData: LongInt;
-    startpos, endpos: LongInt;
+    startpos: LongInt;
+    endpos: LongInt;
+    cycleuSec: LongInt;
   end;
 
 const

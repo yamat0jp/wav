@@ -6,87 +6,100 @@ program wav_proj;
 uses
   System.SysUtils,
   System.Classes,
-  wav in 'wav.pas',
-  WriteHeader in 'WriteHeader.pas',
   spWav in 'spWav.pas';
 
-function checkRange(var sp: SpParam): integer;
-begin
-  result := 0;
-  if sp.startpos * sp.bytesPerSec > sp.sizeOfData then
-  begin
-    Writeln('開始位置がファイルサイズを超えています');
-    result := -1;
-  end
-  else if (sp.endpos + 1) * sp.bytesPerSec > sp.sizeOfData then
-  begin
-    Writeln('終了位置がファイルサイズを超えています');
-    Writeln('終了をファイルの最後に調整しました');
-    sp.endpos := (sp.sizeOfData div sp.bytesPerSec) - 1;
-  end;
-end;
-
-function wavDataWrite(fpIn, fpOut: TFileStream; const sp: SpParam): integer;
+function wavDataWrite(fpOut: TFileStream; const sp: SpParam): integer;
 var
-  Buffer: array of ShortInt;
+  i: integer;
+  s, tempsamplePerCycle, deltaAdd, curLevel: Single;
+  curSampling, samplePerCycle: LongInt;
+  c: array [0..1] of ShortInt;
 begin
-  result := 0;
-  fpIn.Position := sp.posOfData;
-  try
-    GetMem(Pointer(Buffer), sp.sizeOfData);
-  except
-    Writeln('メモリが確保できません');
-    result := -1;
-  end;
-  if fpIn.Read(Pointer(Buffer)^, sp.sizeOfData) = -1 then
+  tempsamplePerCycle:=sp.samplePerSec*sp.cycleuSec div 1000000;
+  samplePerCycle:=Trunc(tempsamplePerCycle);
+  if samplePerCycle <= 0 then
   begin
-    Writeln('読み込みに失敗');
-    result := -1;
+    Writeln('周波数が高すぎ');
+    result:=-1;
+    Exit;
   end;
-  if fpOut.Write(Pointer(Buffer)^, sp.sizeOfData) = -1 then
+  deltaAdd:=65535/samplePerCycle;
+  curLevel:=0;
+  curSampling:=0;
+  i:=0;
+  s:=sp.sizeOfData/SizeOf(@c);
+  while i < s do
   begin
-    Writeln('書き込みに失敗');
-    result := -1;
+    inc(i);
+    c[0]:=ShortInt(Trunc(curLevel-32788));
+    c[1]:=c[0];
+    fpOut.WriteBuffer(c,SizeOf(@c));
+    curLevel:=curLevel+deltaAdd;
+    inc(curSampling);
+    if curSampling > samplePerCycle then
+    begin
+      curLevel:=0;
+      curSampling:=0;
+    end;
   end;
-  FreeMem(Pointer(Buffer));
 end;
 
-function wavWrite(inFile, outFile: PChar; var sp: SpParam): integer;
+function wavWrite(outFile: PChar; const wHdr: WrSWaveFileHeader;
+  var sp: SpParam): integer;
 var
   fpIn, fpOut: TFileStream;
 begin
+  result := 0;
   try
-    fpIn := TFileStream.Create(inFile, fmOpenRead);
     fpOut := TFileStream.Create(outFile, fmCreate);
-    sp.sizeOfData := (sp.endpos - sp.startpos + 1) * sp.bytesPerSec;
-    if waveHeaderWrite(fpOut, sp) > 44 then
-      raise EWriteError.Create('ヘッダを書き込めません');
-    if wavDataWrite(fpIn, fpOut, sp) = -1 then
-      raise EWriteError.Create('エラー発生');
+    fpOut.WriteBuffer(wHdr, SizeOf(WrSWaveFileHeader));
+    if wavDataWrite(fpOut, sp) = -1 then
+      raise EWriteError.Create('');
   except
     on EFOpenError do
-      Writeln(inFile, 'をオープンできません');
-    on EFOpenError do
-      fpIn.Free;
-    else
-
     begin
-      fpIn.Free;
-      fpOut.Free;
+      Writeln(outFile, 'をオープンできません');
+      result := -1;
     end;
-    result := -1;
-    Exit;
+    on EWriteError do
+    begin
+      Writeln('ヘッダを書き込めません');
+      result := -1;
+    end;
   end;
-  result := 0;
+  fpOut.Free;
 end;
 
 procedure usage;
 begin
-  Writeln('引数<入力ファイル名><出力ファイル名><速度倍率>');
+  Writeln('のこぎり波');
+  Writeln('例：effect.wav 100 2000');
+end;
+
+procedure setupHeader(var wHdr: WrSWaveFileHeader; var sp: SpParam);
+var
+  bytes: Byte;
+begin
+  wHdr.hdrRiff := STR_RIFF;
+  wHdr.sizeOfFile := sp.sizeOfData + SizeOf(WrSWaveFileHeader) - 8;
+  wHdr.hdrWave := STR_WAVE;
+  wHdr.hdrFmt := STR_fmt;
+  wHdr.sizeOfFmt := SizeOf(tWaveFormatPcm);
+  wHdr.stWaveFormat.formatTag := 1;
+  wHdr.stWaveFormat.channels := sp.channels;
+  wHdr.stWaveFormat.sampleParSec := sp.samplePerSec;
+  bytes := sp.bitsPerSample div 8;
+  wHdr.stWaveFormat.bytesPerSec := bytes * sp.channels * sp.samplePerSec;
+  wHdr.stWaveFormat.blockAlign := bytes * sp.channels;
+  wHdr.stWaveFormat.bitsPerSample := sp.bitsPerSample;
+  wHdr.hdrData := STR_data;
+  wHdr.sizeOfData := sp.sizeOfData;
 end;
 
 var
   sp: SpParam;
+  totalLength: integer;
+  hdrHeader: WrSWaveFileHeader;
 
 begin
   try
@@ -96,10 +109,15 @@ begin
       usage;
       Exit;
     end;
-    if wavHdrRead(PChar(ParamStr(1)), sp) = -1 then
-      Exit;
-    sp.samplePerSec := StrToInt(ParamStr(3)) * sp.samplePerSec;
-    if wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sp) = -1 then
+    totalLength := StrToInt(ParamStr(2));
+    sp.cycleuSec := StrToInt(ParamStr(3));
+    sp.channels := WAV_STEREO;
+    sp.samplePerSec := 44100;
+    sp.bitsPerSample := 16;
+    sp.sizeOfData := sp.bitsPerSample * sp.channels * sp.samplePerSec *
+      totalLength div 8;
+    setupHeader(hdrHeader, sp);
+    if wavWrite(PChar(ParamStr(1)), hdrHeader, sp) = -1 then
       Exit;
     Writeln('完了');
   except
