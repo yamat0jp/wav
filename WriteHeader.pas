@@ -2,11 +2,15 @@ unit WriteHeader;
 
 interface
 
-uses System.Classes, spWav;
+uses System.Classes, System.SysUtils, spWav;
 
 function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
+function wavWrite(inFile, outFile: PChar; const wHdr: WrSWaveFileHeader;
+  var sp: SpParam): integer;
 
 implementation
+
+uses effect;
 
 function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
 var
@@ -31,6 +35,63 @@ begin
   wrWavHdr.sizeOfData := sp.sizeOfData;
   fp.WriteBuffer(wrWavHdr, SizeOf(WrSWaveFileHeader));
   result := fp.Position;
+end;
+
+function wavDataWrite(fpIn, fpOut: TFileStream; const sp: SpParam): integer;
+var
+  pInMem, pOutMem: TMemoryStream;
+begin
+  result := 0;
+  fpIn.Position := sp.sizeOfData;
+  pInMem := TMemoryStream.Create;
+  pOutMem := TMemoryStream.Create;
+  try
+    if pInMem.CopyFrom(fpIn, sp.sizeOfData) = -1 then
+    begin
+      result := -1;
+      Exit;
+    end;
+    if sp.bitsPerSample = 8 then
+      result := effect8BitWav(pInMem, pOutMem, sp)
+    else
+      result := effect16BitWav(pInMem, pOutMem, sp);
+    if fpOut.CopyFrom(pOutMem, sp.sizeOfData) = 0 then
+    begin
+      result := -1;
+      Writeln('書き込み失敗');
+    end;
+  finally
+    pInMem.Free;
+    pOutMem.Free;
+  end;
+end;
+
+function wavWrite(inFile, outFile: PChar; const wHdr: WrSWaveFileHeader;
+  var sp: SpParam): integer;
+var
+  fpIn, fpOut: TFileStream;
+begin
+  result := 0;
+  try
+    fpIn:=TFileStream.Create(inFile,fmOpenRead);
+    fpOut := TFileStream.Create(outFile, fmCreate);
+    fpOut.WriteBuffer(wHdr, SizeOf(WrSWaveFileHeader));
+    if wavDataWrite(fpIn, fpOut, sp) = -1 then
+      raise EWriteError.Create('');
+  except
+    on EFOpenError do
+    begin
+      Writeln(outFile, 'をオープンできません');
+      result := -1;
+    end;
+    on EWriteError do
+    begin
+      Writeln('ヘッダを書き込めません');
+      result := -1;
+    end;
+  end;
+  fpIn.Free;
+  fpOut.Free;
 end;
 
 end.
