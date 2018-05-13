@@ -30,15 +30,14 @@ end;
 
 function effect16BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
 var
-  i, j, k: integer;
+  i, j: integer;
   pInMem, pOutMem: TBytes;
 begin
   pInMem := InInMem.Memory;
   pOutMem := InOutMem.Memory;
-  i := 0;
-  j := sp.sizeOfData - 2;
-  k := sp.sizeOfData div 2;
-  while i < k do
+  i := sp.posOfData;
+  j := sp.sizeOfData - 1;
+  while i < j do
   begin
     pOutMem[i] := pInMem[j];
     pOutMem[i + 1] := pInMem[j + 1];
