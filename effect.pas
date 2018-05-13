@@ -15,13 +15,15 @@ var
   i, j: integer;
   pInMem, pOutMem: TBytes;
 begin
-  j := sp.sizeOfData - 2;
+  i := sp.posOfData;
+  j := sp.sizeOfData - 1;
   pInMem := InInMem.Memory;
   pOutMem := InOutMem.Memory;
-  for i := 0 to sp.sizeOfData div 2 do
+  while i < j do
   begin
-    pOutMem[2 * i] := pInMem[j];
-    pOutMem[2 * i + 1] := pInMem[j + 1];
+    pOutMem[i] := pInMem[j];
+    pOutMem[i + 1] := pInMem[j + 1];
+    inc(i, 2);
     dec(j, 2);
   end;
 end;
@@ -34,6 +36,7 @@ begin
   pInMem := InInMem.Memory;
   pOutMem := InOutMem.Memory;
   i := 0;
+  j := sp.sizeOfData - 2;
   k := sp.sizeOfData div 2;
   while i < k do
   begin

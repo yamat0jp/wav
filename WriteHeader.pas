@@ -53,6 +53,8 @@ begin
     else
       result := effect16BitWav(pInMem, pOutMem, sp);
     fpOut.CopyFrom(pOutMem, 0);
+    if waveHeaderWrite(fpOut, sp) = -1 then
+      result := -1;
   except
     on EReadError do
       result := -1;
