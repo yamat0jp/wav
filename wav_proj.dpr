@@ -18,14 +18,14 @@ var
 begin
   result := 0;
   i := 0;
-  s := sizeOfData / SizeOf(c);
+  s := sizeOfData / SizeOf(@c);
   while i < s do
   begin
     try
-      fpIn.ReadBuffer(c, SizeOf(c));
-      j:=(c[0]+c[1]) div 2;
-      mix:=j;
-      fpOut.WriteBuffer(mix, SizeOf(mix));
+      fpIn.ReadBuffer(c, SizeOf(@c));
+      j := (c[0] + c[1]) div 2;
+      mix := j;
+      fpOut.WriteBuffer(mix, SizeOf(@mix));
     except
       result := -1;
       break;
@@ -39,18 +39,18 @@ var
   i, j: integer;
   s: Single;
   c: array [0 .. 1] of ShortInt;
-  mix: LongInt;
+  mix: ShortInt;
 begin
   result := 0;
   i := 0;
-  s := sizeOfData / SizeOf(c);
+  s := sizeOfData / SizeOf(@c);
   while i < s do
   begin
     try
-      fpIn.ReadBuffer(c, SizeOf(c));
-      j:=(c[0]+c[1]) div 2;
-      mix:=j;
-      fpOut.WriteBuffer(mix, SizeOf(mix));
+      fpIn.ReadBuffer(c, SizeOf(@c));
+      j := (c[0] + c[1]) div 2;
+      mix := j;
+      fpOut.WriteBuffer(mix, SizeOf(@mix));
     except
       result := -1;
       break;
@@ -80,8 +80,7 @@ begin
     fpIn := TFileStream.Create(inFile, fmOpenRead);
     fpOut := TFileStream.Create(outFile, fmCreate);
     bytesPerSingleCh := sampBits div 8;
-    if waveHeaderWrite(fpOut, sizeOfData, bytesPerSingleCh, sampRate,
-      sampBits) <> 44 then
+    if waveHeaderWrite(fpOut, sizeOfData div 2, WAV_MONAURAL, sampRate, sampBits) <> 44 then
       raise EWriteError.Create('ƒwƒbƒ_‚ğ‘‚«‚ß‚Ü‚¹‚ñ');
     if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
     then
