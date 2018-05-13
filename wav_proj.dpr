@@ -9,81 +9,45 @@ uses
   wav in 'wav.pas',
   WriteHeader in 'WriteHeader.pas';
 
-function effect8BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt): integer;
-var
-  i, j: integer;
-  s: Single;
-  c: array [0 .. 1] of Byte;
-  mix: Byte;
+function cut(fpIn, fpOut: TFileStream; sp: SpParam): integer;
+begin
+
+end;
+
+function checkRange(var sp: SpParam): integer;
 begin
   result := 0;
-  i := 0;
-  s := sizeOfData / SizeOf(@c);
-  while i < s do
+  if sp.startpos * sp.bytesPerSec > sp.sizeOfData then
   begin
-    try
-      fpIn.ReadBuffer(c, SizeOf(@c));
-      j := (c[0] + c[1]) div 2;
-      mix := j;
-      fpOut.WriteBuffer(mix, SizeOf(@mix));
-    except
-      result := -1;
-      break;
-    end;
-    inc(i);
+    Writeln('開始位置がファイルサイズを超えています');
+    result := -1;
+  end
+  else if (sp.endpos + 1) * sp.bytesPerSec > sp.sizeOfData then
+  begin
+    Writeln('終了位置がファイルサイズを超えています');
+    Writeln('終了をファイルの最後に調整しました');
+    sp.endpos := (sp.sizeOfData div sp.bytesPerSec) - 1;
   end;
 end;
 
-function effect16BitWav(fpIn, fpOut: TFileStream; sizeOfData: LongInt): integer;
-var
-  i, j: integer;
-  s: Single;
-  c: array [0 .. 1] of ShortInt;
-  mix: ShortInt;
+function wavDataWrite(fpIn, fpOut: TFileStream; sp: SpParam): integer;
 begin
-  result := 0;
-  i := 0;
-  s := sizeOfData / SizeOf(@c);
-  while i < s do
-  begin
-    try
-      fpIn.ReadBuffer(c, SizeOf(@c));
-      j := (c[0] + c[1]) div 2;
-      mix := j;
-      fpOut.WriteBuffer(mix, SizeOf(@mix));
-    except
-      result := -1;
-      break;
-    end;
-    inc(i);
-  end;
+  fpIn.Position := sp.posOfData;
+ // fpOut.Position := sp.posOfData;
+  result:=cut(fpIn,fpOut,sp);
 end;
 
-function wavDataWrite(fpIn, fpOut: TFileStream; posOfData, sizeOfData: LongInt;
-  bytesPerSingleCh: SmallInt): integer;
-begin
-  fpIn.Position := posOfData;
-  fpOut.Position := posOfData;
-  if bytesPerSingleCh = 1 then
-    result := effect8BitWav(fpIn, fpOut, sizeOfData)
-  else
-    result := effect16BitWav(fpIn, fpOut, sizeOfData);
-end;
-
-function wavWrite(inFile, outFile: PChar; sampRate: LongWord; sampBits: Byte;
-  posOfData, sizeOfData: LongInt): integer;
+function wavWrite(inFile, outFile: PChar; sp: SpParam): integer;
 var
-  bytesPerSingleCh: Word;
   fpIn, fpOut: TFileStream;
 begin
   try
     fpIn := TFileStream.Create(inFile, fmOpenRead);
     fpOut := TFileStream.Create(outFile, fmCreate);
-    bytesPerSingleCh := sampBits div 8;
-    if waveHeaderWrite(fpOut, sizeOfData div 2, WAV_MONAURAL, sampRate, sampBits) <> 44 then
+    sp.sizeOfData := (sp.endpos - sp.startpos + 1) * sp.bytesPerSec;
+    if waveHeaderWrite(fpOut, sp) > 44 then
       raise EWriteError.Create('ヘッダを書き込めません');
-    if wavDataWrite(fpIn, fpOut, posOfData, sizeOfData, bytesPerSingleCh) = -1
-    then
+    if wavDataWrite(fpIn, fpOut, sp) = -1 then
       raise EWriteError.Create('エラー発生');
   except
     on EFOpenError do
@@ -97,21 +61,28 @@ begin
       fpOut.Free;
     end;
     result := -1;
+    Exit;
   end;
   result := 0;
 end;
 
 var
-  sampRate: LongWord;
-  sampBits: Byte;
-  posOfData, sizeOfData: LongInt;
+  sp: SpParam;
 
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    wavHdrRead(PChar(ParamStr(1)), sampRate, sampBits, posOfData, sizeOfData);
-    wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sampRate, sampBits,
-      posOfData, sizeOfData);
+    sp.startpos := LongInt(ParamStr(3));
+    sp.endpos := LongInt(ParamStr(4));
+    if sp.startpos > sp.endpos then
+    begin
+      Writeln('開始秒は終了秒を超えてはなりません');
+      Exit;
+    end;
+    if wavHdrRead(PChar(ParamStr(1)), sp) = -1 then
+      Exit;
+    if wavWrite(PChar(ParamStr(1)), PChar(ParamStr(2)), sp) = -1 then
+      Exit;
     Writeln('完了');
   except
     on E: Exception do

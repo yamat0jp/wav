@@ -31,6 +31,16 @@ type
     sizeOfData: LongWord;
   end;
 
+  SpParam = record
+    samplePerSec: LongWord;
+    bitsPerSample: Byte;
+    sizeOfData: LongWord;
+    channels: Byte;
+    bytesPerSec: LongWord;
+    posOfData: LongInt;
+    startpos, endpos: LongInt;
+  end;
+
 const
   STR_RIFF = 'RIFF';
   STR_WAVE = 'WAVE';

@@ -7,8 +7,7 @@ uses
 
 {$INCLUDE spWav}
 function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
-function wavHdrRead(wavefile: PChar; var sampRate: LongWord; var sampBits: Byte;
-  var posOfData, sizeOfData: LongInt): integer;
+function wavHdrRead(wavefile: PChar; var sp: SpParam): integer;
 
 implementation
 
@@ -50,8 +49,7 @@ begin
   end;
 end;
 
-function wavHdrRead(wavefile: PChar; var sampRate: LongWord; var sampBits: Byte;
-  var posOfData, sizeOfData: LongInt): integer;
+function wavHdrRead(wavefile: PChar; var sp: SpParam): integer;
 var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;
@@ -113,15 +111,15 @@ begin
         fp.Free;
         Exit;
       end;
-      sampRate := waveFmtPcm.sampleParSec;
-      sampBits := waveFmtPcm.bytesPerSec;
+      sp.samplePerSec := waveFmtPcm.sampleParSec;
+      sp.bytesPerSec := waveFmtPcm.bytesPerSec;
       fp.Seek(fPos + len, soFromBeginning);
     end
     else if CompareStr(chank.hdrFmtData, STR_data) = 0 then
     begin
-      sizeOfData := chank.sizeOfFmtData;
-      Writeln('data‚Ì’·‚³:', sizeOfData, '[bytes]');
-      posOfData := fp.Position;
+      sp.sizeOfData := chank.sizeOfFmtData;
+      Writeln('data‚Ì’·‚³:', sp.sizeOfData, '[bytes]');
+      sp.posOfData := fp.Position;
       fp.Seek(fPos + len, soFromBeginning);
       break;
     end
@@ -130,7 +128,7 @@ begin
       len := chank.sizeOfFmtData;
       Writeln(chank.hdrFmtData, '‚Ì’·‚³[bytes]', len);
       fPos := fp.Position;
-      fp.Seek(len,soFromCurrent);
+      fp.Seek(len, soFromCurrent);
     end;
   end;
   fp.Free;
