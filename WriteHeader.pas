@@ -47,15 +47,12 @@ begin
   pOutMem := TMemoryStream.Create;
   try
     pInMem.CopyFrom(fpIn, 0);
-    pOutMem.SetSize(pInMem.Size);
+    pOutMem.CopyFrom(fpIn, 0);
     if sp.bitsPerSample = 8 then
       result := effect8BitWav(pInMem, pOutMem, sp)
     else
       result := effect16BitWav(pInMem, pOutMem, sp);
     fpOut.CopyFrom(pOutMem, 0);
-    pInMem.Position := 0;
-    fpOut.Position := 0;
-    fpOut.CopyFrom(pInMem,sp.posOfData);
   except
     on EReadError do
       result := -1;
