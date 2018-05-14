@@ -147,7 +147,6 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="spWav.pas"/>
-        <DCCReference Include="WriteHeader.pas"/>
         <DCCReference Include="wav.pas"/>
         <DCCReference Include="selectFile.pas"/>
         <BuildConfiguration Include="Release">

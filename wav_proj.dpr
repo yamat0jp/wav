@@ -6,31 +6,28 @@ program wav_proj;
 uses
   System.SysUtils,
   System.Classes,
+  MMSystem,
   spWav in 'spWav.pas',
-  WriteHeader in 'WriteHeader.pas',
   wav in 'wav.pas',
   selectFile in 'selectFile.pas';
 
 var
   sp: SpParam;
-  pMem: TFileStream;
+  pMem: TMemoryStream;
   fileName: string;
   hdrHeader: WrSWaveFileHeader;
 
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
-    fileName:=ExtractFileName(ParamStr(1));
-    if wavHdrRead(PChar(ParamStr(1)), sp) = -1 then
+    fileName := ExtractFileName(ParamStr(1));
+    if wavHdrRead(PChar(ParamStr(1)), sp) < 0 then
       Exit;
-    if readWav(ParamStr(1),pMem) = false then
+    if readWav(ParamStr(1), pMem) = false then
       Exit;
-    if wavHdrRead(PChar(ParamStr(1)),sp) < 0 then
-    begin
-      pMem.Free;
-      Exit;
-    end;
+    PlaySound(pMem.Memory, 0, SND_ASYNC or SND_NODEFAULT or SND_MEMORY);
     Readln;
+    PlaySound(nil, 0, SND_PURGE);
     pMem.Free;
   except
     on E: Exception do
