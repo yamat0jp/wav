@@ -2,48 +2,76 @@ unit effect;
 
 interface
 
-uses System.Classes, System.SysUtils, spWav;
+uses System.Classes, System.SysUtils, Math, spWav;
 
-function effect8BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
-function effect16BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
+function effect8BitWav(const sp: SpParam): integer;
+function effect16BitWav(const sp: SpParam): integer;
 procedure usage;
 function effectwav(const sp: SpParam): integer;
 
 implementation
 
-function effect8BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
+function effect8BitWav(const sp: SpParam): integer;
 var
-  i, j: integer;
-  pInMem, pOutMem: TBytes;
+  i, delayStart: integer;
+  pMem, pCpy: array of Byte;
+  s: TMemoryStream;
+  L, R, DuetL, DuetR: SmallInt;
 begin
-  i := sp.posOfData div SizeOf(Byte);
-  j := sp.sizeOfData div SizeOf(Byte) - 1;
-  pInMem := InInMem.Memory;
-  pOutMem := InOutMem.Memory;
-  while i < j do
-  begin
-    pOutMem[i] := pInMem[j];
-    pOutMem[i + 1] := pInMem[j + 1];
-    inc(i, 2);
-    dec(j, 2);
+  result := 0;
+  try
+    s := TMemoryStream.Create;
+    s.ReadBuffer(sp.pWav^, sp.sizeOfData);
+    pMem := sp.pWav;
+    pCpy := s.Memory;
+    delayStart := sp.samplePerSec * sp.cycleuSec;
+    for i := delayStart to sp.sizeOfData div (sp.bitsPerSample *
+      SizeOf(Byte)) do
+    begin
+      L := pMem[i + 0];
+      R := pMem[i + 1];
+      DuetL := pCpy[i + 0 - delayStart];
+      DuetR := pCpy[i + 1 - delayStart];
+      inc(L, DuetL);
+      inc(R, DuetR);
+      pMem[i+0]:=L;
+      pMem[i+1]:=R;
+    end;
+  except
+    result := -1;
   end;
 end;
 
-function effect16BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
+function effect16BitWav(const sp: SpParam): integer;
 var
-  i, j: integer;
-  pInMem, pOutMem: array of SmallInt;
+  i, delayStart: integer;
+  pMem, pCpy: array of SmallInt;
+  s: TMemoryStream;
+  L, R, DuetL, DuetR: SmallInt;
 begin
-  pInMem := InInMem.Memory;
-  pOutMem := InOutMem.Memory;
-  i := sp.posOfData div SizeOf(SmallInt);
-  j := sp.sizeOfData div SizeOf(SmallInt) - 1;
-  while i < j do
-  begin
-    pOutMem[i] := pInMem[j];
-    pOutMem[i + 1] := pInMem[j + 1];
-    inc(i, 2);
-    dec(j, 2);
+  result := 0;
+  try
+    s := TMemoryStream.Create;
+    s.ReadBuffer(sp.pWav^, sp.sizeOfData);
+    pMem := sp.pWav;
+    pCpy := s.Memory;
+    delayStart := sp.samplePerSec * sp.cycleuSec;
+    for i := delayStart to sp.sizeOfData div (sp.bitsPerSample *
+      SizeOf(SmallInt)) do
+    begin
+      L := pMem[i + 0];
+      R := pMem[i + 1];
+      DuetL := pCpy[i + 0 - delayStart];
+      DuetR := pCpy[i + 1 - delayStart];
+      inc(L, DuetL);
+      inc(R, DuetR);
+      L := SmallInt(max(-32768, min(32767, L)));
+      R := SmallInt(max(-32768, min(32767, R)));
+      pMem[i + 0] := L;
+      pMem[i + 1] := R;
+    end;
+  except
+    result := -1;
   end;
 end;
 
@@ -58,12 +86,12 @@ begin
   if sp.channels = 1 then
   begin
     Writeln('ステレオファイルにしてください');
-    result:=-1;
+    result := -1;
   end;
   if sp.bitsPerSample = 8 then
-    result:=effect8bitWav(sp)
+    result := effect8BitWav(sp)
   else
-    result:=effect16bitWav(sp);
+    result := effect16BitWav(sp);
 end;
 
 end.

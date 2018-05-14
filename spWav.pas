@@ -44,6 +44,8 @@ type
     startpos: LongInt;
     endpos: LongInt;
     cycleuSec: LongInt;
+    pWav: Pointer;
+    cyclicSec: Single;
   end;
 
 const
