@@ -7,6 +7,7 @@ uses System.Classes, System.SysUtils, spWav;
 function effect8BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
 function effect16BitWav(InInMem, InOutMem: TMemoryStream; sp: SpParam): integer;
 procedure usage;
+function effectwav(const sp: SpParam): integer;
 
 implementation
 
@@ -50,6 +51,19 @@ procedure usage;
 begin
   Writeln('のこぎり波');
   Writeln('例：effect.wav 100 2000');
+end;
+
+function effectwav(const sp: SpParam): integer;
+begin
+  if sp.channels = 1 then
+  begin
+    Writeln('ステレオファイルにしてください');
+    result:=-1;
+  end;
+  if sp.bitsPerSample = 8 then
+    result:=effect8bitWav(sp)
+  else
+    result:=effect16bitWav(sp);
 end;
 
 end.
