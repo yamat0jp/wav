@@ -36,9 +36,10 @@ begin
       DuetR := pCpy[i + 1 - delayStart];
       inc(L, DuetL);
       inc(R, DuetR);
-
-      pMem[i + 0] := L;
-      pMem[i + 1] := R;
+      L := max(-128, min(127, L));
+      R := max(-128, min(127, R));
+      pMem[i + 0] := L+128;
+      pMem[i + 1] := R+128;
       inc(i, 2);
     end;
   except
@@ -52,7 +53,7 @@ var
   k: Single;
   pMem, pCpy: array of SmallInt;
   s: TMemoryStream;
-  L, R, DuetL, DuetR: SmallInt;
+  L, R, DuetL, DuetR: integer;
 begin
   result := 0;
   s := TMemoryStream.Create;
