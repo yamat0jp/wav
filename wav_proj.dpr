@@ -48,7 +48,7 @@ begin
       PlaySound(nil, 0, SND_PURGE);
     end;
     pMem.Free;
-    Finalize(sp.pWav);
+    Finalize(sp.pWav^);
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

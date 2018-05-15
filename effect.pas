@@ -14,6 +14,7 @@ implementation
 function effect8BitWav(const sp: SpParam): integer;
 var
   i, delayStart: integer;
+  k: Single;
   pMem, pCpy: array of Byte;
   s: TMemoryStream;
   L, R, DuetL, DuetR: SmallInt;
@@ -25,8 +26,9 @@ begin
     pMem := sp.pWav;
     pCpy := s.Memory;
     delayStart := sp.samplePerSec * sp.cycleuSec;
-    for i := delayStart to sp.sizeOfData div (sp.bitsPerSample *
-      SizeOf(Byte)) do
+    i := delayStart + sp.posOfData;
+    k := 8 * sp.sizeOfData / sp.bitsPerSample;
+    while i < k do
     begin
       L := pMem[i + 0];
       R := pMem[i + 1];
@@ -34,8 +36,10 @@ begin
       DuetR := pCpy[i + 1 - delayStart];
       inc(L, DuetL);
       inc(R, DuetR);
-      pMem[i+0]:=L;
-      pMem[i+1]:=R;
+
+      pMem[i + 0] := L;
+      pMem[i + 1] := R;
+      inc(i, 2);
     end;
   except
     result := -1;
@@ -45,19 +49,23 @@ end;
 function effect16BitWav(const sp: SpParam): integer;
 var
   i, delayStart: integer;
+  k: Single;
   pMem, pCpy: array of SmallInt;
   s: TMemoryStream;
   L, R, DuetL, DuetR: SmallInt;
 begin
   result := 0;
+  s := TMemoryStream.Create;
   try
-    s := TMemoryStream.Create;
-    s.ReadBuffer(sp.pWav^, sp.sizeOfData);
+    SetLength(pCpy, sp.sizeOfData);
+    s.Write(sp.pWav^, sp.sizeOfData);
+    s.Position := 0;
+    s.Read(Pointer(pCpy)^, sp.sizeOfData);
     pMem := sp.pWav;
-    pCpy := s.Memory;
-    delayStart := sp.samplePerSec * sp.cycleuSec;
-    for i := delayStart to sp.sizeOfData div (sp.bitsPerSample *
-      SizeOf(SmallInt)) do
+    delayStart := sp.posOfData + sp.samplePerSec * sp.cyclicSec;
+    i := delayStart + sp.posOfData;
+    k := 8 * sp.sizeOfData / sp.bitsPerSample;
+    while i < k do
     begin
       L := pMem[i + 0];
       R := pMem[i + 1];
@@ -65,14 +73,17 @@ begin
       DuetR := pCpy[i + 1 - delayStart];
       inc(L, DuetL);
       inc(R, DuetR);
-      L := SmallInt(max(-32768, min(32767, L)));
-      R := SmallInt(max(-32768, min(32767, R)));
+      L := max(-32768, min(32767, L));
+      R := max(-32768, min(32767, R));
       pMem[i + 0] := L;
       pMem[i + 1] := R;
+      inc(i, 2);
     end;
   except
     result := -1;
   end;
+  s.Free;
+  Finalize(pCpy);
 end;
 
 procedure usage;

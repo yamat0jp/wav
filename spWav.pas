@@ -45,7 +45,7 @@ type
     endpos: LongInt;
     cycleuSec: LongInt;
     pWav: Pointer;
-    cyclicSec: Single;
+    cyclicSec: integer;
   end;
 
 const
