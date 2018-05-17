@@ -50,7 +50,7 @@ end;
 function effect16BitWav(const sp: SpParam): integer;
 const
   depth = 1.0;
-  rate = 150.0;
+  rate = 170.0;
 var
   i: integer;
   k, m: Single;
@@ -69,7 +69,7 @@ begin
     k := 8 * sp.sizeOfData / sp.bitsPerSample;
     while i < k do
     begin
-      m := sin(depth * rate * pi * i / sp.samplePerSec);
+      m := depth * sin(rate * pi * i / sp.samplePerSec);
       pMem[i + 0] := trunc(m * pMem[i + 0]);
       pMem[i + 1] := trunc(m * pMem[i + 1]);
       inc(i, 2);
