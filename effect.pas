@@ -12,12 +12,14 @@ function effectwav(const sp: SpParam): integer;
 implementation
 
 function effect8BitWav(const sp: SpParam): integer;
+const
+  depth = 1.0;
+  rate = 170.0;
 var
   i, delayStart: integer;
-  k: Single;
+  k, m: Single;
   pMem, pCpy: array of Byte;
   s: TMemoryStream;
-  L, R, DuetL, DuetR: SmallInt;
 begin
   result := 0;
   try
@@ -25,21 +27,13 @@ begin
     s.ReadBuffer(sp.pWav^, sp.sizeOfData);
     pMem := sp.pWav;
     pCpy := s.Memory;
-    delayStart := sp.samplePerSec * sp.cycleuSec;
-    i := delayStart + sp.posOfData;
+    i := sp.posOfData;
     k := 8 * sp.sizeOfData / sp.bitsPerSample;
     while i < k do
     begin
-      L := pMem[i + 0];
-      R := pMem[i + 1];
-      DuetL := pCpy[i + 0 - delayStart];
-      DuetR := pCpy[i + 1 - delayStart];
-      inc(L, DuetL);
-      inc(R, DuetR);
-      L := max(-128, min(127, L));
-      R := max(-128, min(127, R));
-      pMem[i + 0] := L + 128;
-      pMem[i + 1] := R + 128;
+      m := depth * sin(2 * pi * rate / sp.samplePerSec);
+      pMem[i + 0] := trunc(m * pMem[i + 0]) + 128;
+      pMem[i + 1] := trunc(m * pMem[i + 1]) + 128;
       inc(i, 2);
     end;
   except
@@ -69,7 +63,7 @@ begin
     k := 8 * sp.sizeOfData / sp.bitsPerSample;
     while i < k do
     begin
-      m := depth * sin(rate * pi * i / sp.samplePerSec);
+      m := depth * sin(2 * rate * pi * i / sp.samplePerSec);
       pMem[i + 0] := trunc(m * pMem[i + 0]);
       pMem[i + 1] := trunc(m * pMem[i + 1]);
       inc(i, 2);
