@@ -22,8 +22,6 @@ var
   i: integer;
 begin
   sp.pWav:=pMem.Memory;
-  Writeln('‚Qd¥‚ÌŠÔ·');
-  Readln(i);
   sp.cyclicSec:=i;
   result:=0;
 end;

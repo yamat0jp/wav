@@ -38,8 +38,8 @@ begin
       inc(R, DuetR);
       L := max(-128, min(127, L));
       R := max(-128, min(127, R));
-      pMem[i + 0] := L+128;
-      pMem[i + 1] := R+128;
+      pMem[i + 0] := L + 128;
+      pMem[i + 1] := R + 128;
       inc(i, 2);
     end;
   except
@@ -48,12 +48,14 @@ begin
 end;
 
 function effect16BitWav(const sp: SpParam): integer;
+const
+  depth = 1.0;
+  rate = 150.0;
 var
-  i, delayStart: integer;
-  k: Single;
+  i: integer;
+  k, m: Single;
   pMem, pCpy: array of SmallInt;
   s: TMemoryStream;
-  L, R, DuetL, DuetR: integer;
 begin
   result := 0;
   s := TMemoryStream.Create;
@@ -63,21 +65,13 @@ begin
     s.Position := 0;
     s.Read(Pointer(pCpy)^, sp.sizeOfData);
     pMem := sp.pWav;
-    delayStart := sp.posOfData + sp.samplePerSec * sp.cyclicSec;
-    i := delayStart + sp.posOfData;
+    i := sp.posOfData;
     k := 8 * sp.sizeOfData / sp.bitsPerSample;
     while i < k do
     begin
-      L := pMem[i + 0];
-      R := pMem[i + 1];
-      DuetL := pCpy[i + 0 - delayStart];
-      DuetR := pCpy[i + 1 - delayStart];
-      inc(L, DuetL);
-      inc(R, DuetR);
-      L := max(-32768, min(32767, L));
-      R := max(-32768, min(32767, R));
-      pMem[i + 0] := L;
-      pMem[i + 1] := R;
+      m := sin(depth * rate * pi * i / sp.samplePerSec);
+      pMem[i + 0] := trunc(m * pMem[i + 0]);
+      pMem[i + 1] := trunc(m * pMem[i + 1]);
       inc(i, 2);
     end;
   except
