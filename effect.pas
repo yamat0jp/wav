@@ -70,7 +70,7 @@ begin
     SetLength(r, pmax - pmin);
     offset0 := sp.posOfData;
     offset1 := sp.posOfData;
-    rate := 1.5;
+    rate := 0.66;
     while offset0 + pmax * 2 < sp.sizeOfData do
     begin
       max := 0.0;
@@ -86,36 +86,30 @@ begin
           p := b;
         end;
       end;
-      for i := 0 to p do
+      for i := 0 to p - 1 do
       begin
         pMem[offset1 + i] := trunc(pCpy[offset0 + i]);
-        pMem[offset1 + i + p] := trunc(pCpy[offset0 + i + p] * (p - i) / p) +
-          trunc(pCpy[offset0 + p + i] * i / p);
+        pMem[offset1 + i + p] := trunc(pCpy[offset0 + p + i] * (p - i) / p +
+          pCpy[offset0 + i] * i / p);
+      end;
+      q := trunc(rate * p / (1.0 - rate) + 0.5);
+      for i := p to q - 1 do
+      begin
+        if offset0 + i >= sp.sizeOfData then
+          break;
+        pMem[offset1 + p + i] := pCpy[offset0 + i];
       end;
       inc(offset0, q);
       inc(offset1, p + q);
     end;
-    q := trunc(p / (rate - 1) + 0.5);
-    for i := p to q do
-    begin
-      if offset0 + p + i > sp.sizeOfData then
-        break;
-      pMem[offset1 + p + i] := pCpy[offset0 + i];
-    end;
     pitch := 0.66;
-    while i < k do
+    for i := sp.posOfData to sp.sizeOfData do
     begin
       m := pitch * i;
       q := trunc(m);
       for a := q - j div 2 to q + j div 2 do
         if (m >= sp.posOfData) and (m < sp.sizeOfData) then
-        begin
-          pMem[a + 0] := trunc(pMem[a + 0] + pCpy[a + 0] *
-            ArcSin(pi * (m - a)));
-          pMem[a + 1] := trunc(pMem[a + 1] + pCpy[a + 1] *
-            ArcSin(pi * (m - a)));
-        end;
-      inc(i, 2);
+          pMem[a] := trunc(pMem[a + 0] + pCpy[a + 0] * ArcSin(pi * (m - a)));
     end;
   except
     result := -1;
