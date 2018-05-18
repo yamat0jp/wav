@@ -17,15 +17,6 @@ var
   pMem: TMemoryStream;
   fileName: string;
 
-function getPara(var sp: SpParam): integer;
-var
-  i: integer;
-begin
-  sp.pWav:=pMem.Memory;
-  sp.cyclicSec:=i;
-  result:=0;
-end;
-
 begin
   try
     { TODO -oUser -cConsole メイン : ここにコードを記述してください }
@@ -34,11 +25,7 @@ begin
       Exit;
     if readWav(ParamStr(1), pMem) = false then
       Exit;
-    if getPara(sp) = -1 then
-    begin
-      pMem.Free;
-      Exit;
-    end;
+    sp.pWav := pMem.Memory;
     if effectWav(sp) = 0 then
     begin
       PlaySound(pMem.Memory, 0, SND_ASYNC or SND_NODEFAULT or SND_MEMORY);
