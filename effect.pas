@@ -30,8 +30,6 @@ begin
     s.Position := 0;
     s.Read(Pointer(pCpy)^, sp.sizeOfData);
     pMem := sp.pWav;
-    i := sp.posOfData;
-    k := 8 * sp.sizeOfData / sp.bitsPerSample;
     temp_size := trunc(sp.samplePerSec * sp.bitsPerSample * sp.channels * 0.01);
     pmin := trunc(sp.samplePerSec * sp.bitsPerSample * sp.channels * 0.005);
     pmax := trunc(sp.samplePerSec * sp.bitsPerSample * sp.channels * 0.02);
@@ -105,8 +103,6 @@ begin
     s.Position := 0;
     s.Read(Pointer(pCpy)^, sp.sizeOfData);
     pMem := sp.pWav;
-    i := sp.posOfData;
-    k := 8 * sp.sizeOfData / sp.bitsPerSample;
     temp_size := trunc(sp.samplePerSec * sp.bitsPerSample * sp.channels * 0.01);
     pmin := trunc(sp.samplePerSec * sp.bitsPerSample * sp.channels * 0.005);
     pmax := trunc(sp.samplePerSec * sp.bitsPerSample * sp.channels * 0.02);
@@ -114,7 +110,7 @@ begin
     offset0 := sp.posOfData;
     offset1 := sp.posOfData;
     rate := 0.66;
-    while offset1 + i + p < sp.sizeOfData do
+    while offset1 + 2 * pmax < sp.sizeOfData do
     begin
       ma := 0.0;
       p := pmin;
@@ -129,7 +125,7 @@ begin
           p := b;
         end;
       end;
-      for i := 0 to p - 1 do
+      for i := 0 to p do
       begin
         pMem[offset1 + i] := pCpy[offset0 + i];
         pMem[offset1 + i + p] := trunc(pCpy[offset0 + p + i] * (p - i) / p +
@@ -146,7 +142,7 @@ begin
       inc(offset1, p + q);
     end;
     pitch := 1.5;
-    for i := sp.posOfData to sp.sizeOfData do
+    for i := sp.posOfData to sp.sizeOfData - 1 do
     begin
       m := pitch * i;
       q := trunc(m);
@@ -165,7 +161,7 @@ end;
 function sinc(x: Single): Single;
 begin
   if x = 0 then
-    result := 1
+    result := 1.0
   else
     result := sin(x) / x;
 end;
