@@ -110,7 +110,7 @@ begin
     offset0 := sp.posOfData;
     offset1 := sp.posOfData;
     rate := 0.66;
-    k:=sp.sizeOfData div sp.channels;
+    k := sp.sizeOfData div sp.channels;
     while offset1 + 2 * pmax < k do
     begin
       ma := 0.0;
@@ -132,7 +132,7 @@ begin
         pMem[offset1 + i + p] := trunc(pCpy[offset0 + p + i] * (p - i) / p +
           pCpy[offset0 + i] * i / p);
       end;
-      q := trunc(rate * p / Abs(1.0 - rate) + 0.5);
+      q := trunc(rate * p / (1.0 - rate) + 0.5);
       for i := p to q - 1 do
       begin
         if offset1 + i + p >= k then
@@ -143,20 +143,20 @@ begin
       inc(offset1, p + q);
     end;
     pitch := 1.5;
-    for i := sp.posOfData to sp.sizeOfData - 1 do
+    for i := sp.posOfData to k - 1 do
     begin
       m := pitch * i;
       q := trunc(m);
       for a := q - j div 2 to q + j div 2 do
         if (a >= sp.posOfData) and (a < k) then
-          pMem[i] := pMem[i] + pCpy[a] * trunc(sinc(pi * (m - a)));
+          pMem[i] := pMem[a] + pCpy[a] * trunc(sinc(pi * (m - a)));
     end;
   except
     result := -1;
   end;
+  Finalize(pCpy);
   Finalize(r);
   s.Free;
-  Finalize(pCpy);
 end;
 
 function sinc(x: Single): Single;

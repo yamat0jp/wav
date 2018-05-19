@@ -32,6 +32,7 @@ begin
       Readln;
       PlaySound(nil, 0, SND_PURGE);
     end;
+    pMem.SaveToFile(ExtractFilePath(ParamStr(1))+'effect.wav');
     pMem.Free;
     Finalize(sp.pWav^);
   except
