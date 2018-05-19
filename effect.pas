@@ -149,7 +149,9 @@ begin
       q := trunc(m);
       for a := q - j div 2 to q + j div 2 do
         if (a >= sp.posOfData) and (a < k) then
-          pMem[i] := pMem[a] + pCpy[a] * trunc(sinc(pi * (m - a)));
+          pMem[i] := pMem[a] + pCpy[a] * trunc(sinc(pi * (m - a)))
+        else
+          pMem[i] := 0;
     end;
   except
     result := -1;
