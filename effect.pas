@@ -110,22 +110,22 @@ begin
     offset0 := sp.posOfData;
     offset1 := sp.posOfData;
     rate := 0.66;
-    k := sp.sizeOfData div sp.channels;
+    k := (sp.sizeOfData - sp.posOfData) div sp.channels;
+    for b := 0 to pmax - pmin - 1 do
+    begin
+      r[b] := 0.0;
+      for a := sp.posOfData to sp.posOfData + temp_size do
+        r[b] := r[b] + pCpy[a] * pCpy[a + b];
+      if r[b] > ma then
+      begin
+        ma := r[b];
+        p := b;
+      end;
+    end;
     while offset1 + 2 * pmax < k do
     begin
       ma := 0.0;
       p := pmin;
-      for b := 0 to pmax - pmin - 1 do
-      begin
-        r[b] := 0.0;
-        for a := sp.posOfData to sp.posOfData + temp_size do
-          r[b] := r[b] + pCpy[a] * pCpy[a + b];
-        if r[b] > ma then
-        begin
-          ma := r[b];
-          p := b;
-        end;
-      end;
       for i := 0 to p do
       begin
         pMem[offset1 + i] := pCpy[offset0 + i];
@@ -180,7 +180,7 @@ begin
   if sp.channels = 1 then
   begin
     Writeln('ステレオファイルにしてください');
-    result := -1;
+    // result := -1;
   end;
   if sp.bitsPerSample = 8 then
     result := effect8BitWav(sp)

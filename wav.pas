@@ -27,7 +27,7 @@ begin
       begin
         Writeln('ステレオファイルを対象としています');
         Writeln('チャンネル数は', channels);
-        result := -1;
+//        result := -1;
       end;
       if formatTag <> 1 then
       begin
