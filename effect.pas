@@ -89,8 +89,8 @@ function effect16BitWav(const sp: SpParam): integer;
 const
   j = 24;
 var
-  i, a, b, pmin, pmax, temp_size, offset0, offset1, p, q: integer;
-  k, m, ma, pitch, rate: Single;
+  i, k, a, b, pmin, pmax, temp_size, offset0, offset1, p, q: integer;
+  m, ma, pitch, rate: Single;
   pMem, pCpy: array of SmallInt;
   r: array of Single;
   s: TMemoryStream;
@@ -110,7 +110,8 @@ begin
     offset0 := sp.posOfData;
     offset1 := sp.posOfData;
     rate := 0.66;
-    while offset1 + 2 * pmax < sp.sizeOfData do
+    k:=sp.sizeOfData div sp.channels;
+    while offset1 + 2 * pmax < k do
     begin
       ma := 0.0;
       p := pmin;
@@ -134,7 +135,7 @@ begin
       q := trunc(rate * p / Abs(1.0 - rate) + 0.5);
       for i := p to q - 1 do
       begin
-        if offset0 + i >= sp.sizeOfData then
+        if offset1 + i + p >= k then
           break;
         pMem[offset1 + p + i] := pCpy[offset0 + i];
       end;
@@ -147,7 +148,7 @@ begin
       m := pitch * i;
       q := trunc(m);
       for a := q - j div 2 to q + j div 2 do
-        if (a >= sp.posOfData) and (a < sp.sizeOfData) then
+        if (a >= sp.posOfData) and (a < k) then
           pMem[i] := pMem[i] + pCpy[a] * trunc(sinc(pi * (m - a)));
     end;
   except
