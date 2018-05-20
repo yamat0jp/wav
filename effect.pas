@@ -20,7 +20,8 @@ function effect16BitWav(const sp: SpParam): integer;
 const
   j = 24;
 var
-  i, k, a, b, pmin, pmax, temp_size, offset0, offset1, p, q: integer;
+  i, k, a, b, pmin, pmax: integer;
+  len, temp_size, offset0, offset1, p, q: integer;
   m, ma, pitch, rate: Single;
   pMem, pCpy: array of SmallInt;
   r: array of Single;
@@ -35,7 +36,8 @@ begin
     offset0 := sp.posOfData;
     offset1 := sp.posOfData;
     rate := 0.66;
-    SetLength(pCpy, sp.sizeOfData);
+    len := trunc(sp.sizeOfData / (rate * sp.channels));
+    SetLength(pCpy, len);
     k := (sp.sizeOfData - sp.posOfData) div sp.channels;
     for b := 0 to pmax - pmin - 1 do
     begin
@@ -48,7 +50,7 @@ begin
         p := b;
       end;
     end;
-    while offset1 + 2 * pmax < k do
+    while offset1 + 2 * pmax < len do
     begin
       ma := 0.0;
       p := pmin;
