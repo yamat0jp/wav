@@ -38,13 +38,13 @@ begin
     rate := 0.66;
     len := trunc(sp.sizeOfData / (rate * sp.channels));
     SetLength(pCpy, len);
-    SetLength(pRes,len);
-    s:=TMemoryStream.Create;
-    s.Write(sp.pWav^,sp.sizeOfData);
-    s.Position:=0;
-    s.Read(Pointer(pRes)^,s.Size);
+    SetLength(pRes, len);
+    s := TMemoryStream.Create;
+    s.Write(sp.pWav^, sp.sizeOfData);
+    s.Position := 0;
+    s.Read(Pointer(pRes)^, s.Size);
     s.Free;
-    pMem:=sp.pWav;
+    pMem := sp.pWav;
     k := (sp.sizeOfData - sp.posOfData) div sp.channels;
     for b := 0 to pmax - pmin - 1 do
     begin
@@ -70,7 +70,7 @@ begin
       q := trunc(rate * p / (1.0 - rate) + 0.5);
       for i := p to q - 1 do
       begin
-        if offset1 + i + p >= k then
+        if offset1 + i + p >= len then
           break;
         pCpy[offset1 + p + i] := pMem[offset0 + i];
       end;
