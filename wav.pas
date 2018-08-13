@@ -10,35 +10,40 @@ function wavHdrRead(wavefile: PChar; var sp: SpParam): integer;
 
 implementation
 
+uses Unit2;
+
 function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
 begin
   result := 0;
   try
     fp.ReadBuffer(waveFmtPcm, SizeOf(tWaveFormatPcm));
-    Writeln('データ形式：', waveFmtPcm.formatTag);
-    Writeln('チャンネル数：', waveFmtPcm.channels);
-    Writeln('サンプリング周波数：', waveFmtPcm.sampleParSec);
-    Writeln('バイト数　/　秒：', waveFmtPcm.bytesPerSec);
-    Writeln('バイト数 Ｘ チャンネル数：', waveFmtPcm.blockAlign);
-    Writeln('ビット数　/　サンプル：', waveFmtPcm.bitsPerSample);
+    with Form2.ListBox1.Items do
+    begin
+      Add('データ形式：' + waveFmtPcm.formatTag.ToString);
+      Add('チャンネル数：' + waveFmtPcm.channels.ToString);
+      Add('サンプリング周波数：' + waveFmtPcm.sampleParSec.ToString);
+      Add('バイト数　/　秒：' + waveFmtPcm.bytesPerSec.ToString);
+      Add('バイト数 Ｘ チャンネル数：' + waveFmtPcm.blockAlign.ToString);
+      Add('ビット数　/　サンプル：' + waveFmtPcm.bitsPerSample.ToString);
+    end;
     with waveFmtPcm do
     begin
       if channels <> 2 then
       begin
-        Writeln('ステレオファイルを対象としています');
-        Writeln('チャンネル数は', channels);
-//        result := -1;
+        Form2.ListBox1.Items.Add('ステレオファイルを対象としています');
+        Form2.ListBox1.Items.Add('チャンネル数は' + channels.ToString);
+        // result := -1;
       end;
       if formatTag <> 1 then
       begin
-        Writeln('無圧縮のPCMのみ対象');
-        Writeln('フォーマット形式は', formatTag);
+        Form2.ListBox1.Items.Add('無圧縮のPCMのみ対象');
+        Form2.ListBox1.Items.Add('フォーマット形式は' + formatTag.ToString);
         result := -1;
       end;
-      if (bitsPerSample <> 8) and (bitsPerSample <> 16) then
+      if bitsPerSample <> 16 then
       begin
-        Writeln('8/16ビットのみ対象');
-        Writeln('bit/secは', bitsPerSample);
+        Form2.ListBox1.Items.Add('16ビットのみ対象');
+        Form2.ListBox1.Items.Add('bit/secは' + bitsPerSample.ToString);
         result := -1;
       end;
     end;
@@ -56,31 +61,31 @@ var
   fPos, len: integer;
   fp: TFileStream;
 begin
+  Form2.ListBox1.Items.Clear;
   try
-    fp := TFileStream.Create(wavefile, fmOpenRead);
+    fp := TFileStream.Create(wavefile, fmOpenReadWrite);
     fp.ReadBuffer(waveFileHeader, SizeOf(SWaveFileHeader));
   except
     on EReadError do
     begin
-      Writeln('読み込み失敗');
+      Form2.ListBox1.Items.Add('読み込み失敗');
       fp.Free;
     end;
     else
-      Writeln('開けません');
+      Form2.ListBox1.Items.Add('開けません');
     result := -1;
     Exit;
   end;
-  Writeln(wavefile);
   if CompareStr(waveFileHeader.hdrRiff, STR_RIFF) <> 0 then
   begin
-    Writeln('RIFFフォーマットでない');
+    Form2.ListBox1.Items.Add('RIFFフォーマットでない');
     result := -1;
     fp.Free;
     Exit;
   end;
   if CompareStr(waveFileHeader.hdrWave, STR_WAVE) <> 0 then
   begin
-    Writeln('"WAVE"がない');
+    Form2.ListBox1.Items.Add('"WAVE"がない');
     result := -1;
     fp.Free;
     Exit;
@@ -102,7 +107,7 @@ begin
     if CompareStr(chank.hdrFmtData, STR_fmt) = 0 then
     begin
       len := chank.sizeOfFmtData;
-      Writeln('fmt の長さ', len, '[bytes]');
+      Form2.ListBox1.Items.Add(Format('fmt の長さ%d[bytes]', [len]));
       fPos := fp.Position;
       if readFmtChank(fp, waveFmtPcm) <> 0 then
       begin
@@ -118,16 +123,23 @@ begin
     end
     else if CompareStr(chank.hdrFmtData, STR_data) = 0 then
     begin
-      sp.sizeOfData := chank.sizeOfFmtData;
-      Writeln('dataの長さ:', sp.sizeOfData, '[bytes]');
+      if chank.sizeOfFmtData = 0 then
+      begin
+        sp.sizeOfData := fp.Size - fp.Position;
+        fp.Position := fPos + len;
+        chank.sizeOfFmtData := sp.sizeOfData;
+        fp.WriteBuffer(chank, SizeOf(tChank));
+      end
+      else
+        sp.sizeOfData := chank.sizeOfFmtData;
       sp.posOfData := fp.Position;
-      fp.Seek(fPos + len, soFromBeginning);
+      Form2.ListBox1.Items.Add(Format('dataの長さ:%d[bytes]', [sp.sizeOfData]));
       break;
     end
     else
     begin
       len := chank.sizeOfFmtData;
-      Writeln(chank.hdrFmtData, 'の長さ[bytes]', len);
+      Form2.ListBox1.Items.Add(chank.hdrFmtData + 'の長さ[bytes]' + len.ToString);
       fPos := fp.Position;
       fp.Seek(len, soFromCurrent);
     end;

@@ -8,10 +8,12 @@ function readWav(const fName: string; out pMem: TMemoryStream): Boolean;
 
 implementation
 
+uses Unit2;
+
 function readWav(const fName: string; out pMem: TMemoryStream): Boolean;
 var
   f: TFileStream;
-  sizeOfFile, length: integer;
+  sizeOfFile: integer;
 begin
   result := false;
   if FileExists(fName) = false then
@@ -19,7 +21,7 @@ begin
   f := TFileStream.Create(fName, fmOpenRead);
   try
     sizeOfFile := f.Size;
-    Writeln('ファイルサイズ', sizeOfFile);
+    Form2.ListBox1.Items.Add('ファイルサイズ'+ sizeOfFile.ToString);
     pMem := TMemoryStream.Create;
     pMem.CopyFrom(f, 0);
     result := true;

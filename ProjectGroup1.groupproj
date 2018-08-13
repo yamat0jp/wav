@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{E06EA96E-1640-4BC7-8AFD-F0777E83E3EB}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="changer.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="changer">
+        <MSBuild Projects="changer.dproj"/>
+    </Target>
+    <Target Name="changer:Clean">
+        <MSBuild Projects="changer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="changer:Make">
+        <MSBuild Projects="changer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="changer"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="changer:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="changer:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
