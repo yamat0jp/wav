@@ -8,7 +8,8 @@ uses
   effect in 'effect.pas',
   wav in 'wav.pas',
   selectFile in 'selectFile.pas',
-  WriteHeader in 'WriteHeader.pas';
+  WriteHeader in 'WriteHeader.pas',
+  common in 'common.pas';
 
 {$R *.res}
 

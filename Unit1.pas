@@ -54,7 +54,7 @@ implementation
 
 {$R *.fmx}
 
-uses wav, effect, selectFile, WriteHeader;
+uses wav, effect, selectFile, WriteHeader, common;
 
 procedure TForm1.StartButtonClick(Sender: TObject);
 begin
@@ -84,6 +84,7 @@ var
   wh: WrSWaveFileHeader;
   wf: tWaveFormatPCM;
   fp: TFileStream;
+  wave: TMyWave;
 begin
   case ComboBox1.ItemIndex of
     0:
@@ -140,6 +141,15 @@ begin
         end;
         ListBox1.Items.Text := s;
       end;
+    3:
+    begin
+      wave:=TSpWave.Create;
+      try
+        wave.main(3,'test');
+      finally
+        wave.Free;
+      end;
+    end;
   end;
 end;
 
