@@ -1,0 +1,159 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 480
+  ClientWidth = 400
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object GridLayout1: TGridLayout
+    Align = MostTop
+    ItemHeight = 64.000000000000000000
+    ItemWidth = 400.000000000000000000
+    Orientation = Horizontal
+    Size.Width = 400.000000000000000000
+    Size.Height = 201.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object FlowLayout1: TFlowLayout
+      Size.Width = 400.000000000000000000
+      Size.Height = 64.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Justify = Center
+      JustifyLastLine = Left
+      FlowDirection = LeftToRight
+      object Label1: TLabel
+        Size.Width = 200.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Recording'
+      end
+      object Label2: TLabel
+        Position.X = 200.000000000000000000
+        Size.Width = 200.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Playing'
+      end
+      object StartButton: TSpeedButton
+        StaysPressed = True
+        Position.Y = 17.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'StartButton'
+        OnClick = StartButtonClick
+      end
+      object RecordButton: TSpeedButton
+        StaysPressed = True
+        Position.X = 100.000000000000000000
+        Position.Y = 17.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'RecordButton'
+        OnClick = RecordButtonClick
+      end
+      object PauseButton: TSpeedButton
+        StaysPressed = True
+        Position.X = 200.000000000000000000
+        Position.Y = 17.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'PauseButton'
+        OnClick = PauseButtonClick
+      end
+      object StopButton: TSpeedButton
+        Position.X = 300.000000000000000000
+        Position.Y = 17.000000000000000000
+        Size.Width = 100.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'StopButton'
+        OnClick = StopButtonClick
+      end
+    end
+    object FlowLayout2: TFlowLayout
+      Position.Y = 64.000000000000000000
+      Size.Width = 400.000000000000000000
+      Size.Height = 64.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Justify = Left
+      JustifyLastLine = Left
+      FlowDirection = LeftToRight
+      object ArcDial1: TArcDial
+        Enabled = False
+        Size.Width = 65.000000000000000000
+        Size.Height = 65.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ArcDial1Change
+      end
+      object Image1: TImage
+        MultiResBitmap = <
+          item
+          end>
+        Position.X = 65.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 65.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object Image2: TImage
+        MultiResBitmap = <
+          item
+          end>
+        Position.X = 129.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 65.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object Image3: TImage
+        MultiResBitmap = <
+          item
+          end>
+        Position.X = 193.000000000000000000
+        Size.Width = 64.000000000000000000
+        Size.Height = 65.000000000000000000
+        Size.PlatformDefault = False
+      end
+    end
+  end
+  object MediaPlayer1: TMediaPlayer
+    Left = 240
+    Top = 168
+  end
+  object Button1: TButton
+    Position.X = 160.000000000000000000
+    Position.Y = 232.000000000000000000
+    TabOrder = 5
+    Text = 'Button1'
+    OnClick = Button1Click
+  end
+  object ProgressBar1: TProgressBar
+    Orientation = Horizontal
+    Position.X = 152.000000000000000000
+    Position.Y = 288.000000000000000000
+  end
+  object ListBox1: TListBox
+    Position.X = 104.000000000000000000
+    Position.Y = 336.000000000000000000
+    Size.Width = 200.000000000000000000
+    Size.Height = 120.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 9
+    DisableFocusEffect = True
+    DefaultItemStyles.ItemStyle = ''
+    DefaultItemStyles.GroupHeaderStyle = ''
+    DefaultItemStyles.GroupFooterStyle = ''
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 312
+    Top = 168
+  end
+end

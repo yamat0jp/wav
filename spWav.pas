@@ -3,18 +3,18 @@ unit spWav;
 interface
 
 type
-  SWaveFileHeader = record
+  SWaveFileHeader = packed record
     hdrRiff: array [0 .. 3] of AnsiChar;
     sizeOfFile: LongWord;
     hdrWave: array [0 .. 3] of AnsiChar;
   end;
 
-  tChank = record
+  tChank = packed record
     hdrFmtData: array [0 .. 3] of AnsiChar;
     sizeOfFmtData: LongWord;
   end;
 
-  tWaveFormatPcm = record
+  tWaveFormatPcm = packed record
     formatTag: SmallInt;
     channels: SmallInt;
     sampleParSec: LongWord;
@@ -23,7 +23,7 @@ type
     bitsPerSample: SmallInt;
   end;
 
-  WrSWaveFileHeader = record
+  WrSWaveFileHeader = packed record
     hdrRiff: array [0..3] of AnsiChar;
     sizeOfFile: LongWord;
     hdrWave: array [0..3] of AnsiChar;
@@ -34,7 +34,7 @@ type
     sizeOfData: LongWord;
   end;
 
-  SpParam = record
+  SpParam = packed record
     samplePerSec: LongWord;
     bitsPerSample: Byte;
     sizeOfData: LongWord;

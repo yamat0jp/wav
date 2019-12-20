@@ -40,6 +40,8 @@ implementation
 {$R *.dfm}
 
 procedure TForm2.Button1Click(Sender: TObject);
+var
+  s: string;
 begin
   if FileExists(Edit1.Text) = true then
     fileName := Edit1.Text
@@ -53,8 +55,9 @@ begin
     Edit1.Text := '';
     Exit;
   end;
+  ListBox1.Clear;
   MediaPlayer1.Close;
-  if wavHdrRead(PChar(fileName), sp) < 0 then
+  if wavHdrRead(PChar(fileName), sp, s) < 0 then
     Exit;
   if readWav(fileName, pMem) = false then
     Exit;
@@ -78,6 +81,7 @@ begin
   end;
   pMem.Free;
   Finalize(sp.pWav^);
+  ListBox1.Items.Add(s);
 end;
 
 procedure TForm2.MediaPlayer1Click(Sender: TObject; Button: TMPBtnType;
@@ -130,11 +134,14 @@ begin
 end;
 
 procedure TForm2.SpeedButton1Click(Sender: TObject);
+var
+  s: string;
 begin
   if OpenDialog1.Execute = true then
   begin
     Edit1.Text := OpenDialog1.fileName;
-    wavHdrRead(PChar(Edit1.Text),sp);
+    wavHdrRead(PChar(Edit1.Text),sp,s);
+    ListBox1.Items.Text:=s;
     MediaPlayer1MouseEnter(Sender);
   end;
 end;

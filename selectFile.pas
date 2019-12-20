@@ -21,7 +21,7 @@ begin
   f := TFileStream.Create(fName, fmOpenRead);
   try
     sizeOfFile := f.Size;
-    Form2.ListBox1.Items.Add('ファイルサイズ'+ sizeOfFile.ToString);
+//    Form2.ListBox1.Items.Add('ファイルサイズ'+ sizeOfFile.ToString);
     pMem := TMemoryStream.Create;
     pMem.CopyFrom(f, 0);
     result := true;

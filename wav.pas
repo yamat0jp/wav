@@ -6,7 +6,7 @@ uses
   System.Classes, System.SysUtils, spWav;
 
 function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
-function wavHdrRead(wavefile: PChar; var sp: SpParam): integer;
+function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
 
 implementation
 
@@ -53,7 +53,7 @@ begin
   end;
 end;
 
-function wavHdrRead(wavefile: PChar; var sp: SpParam): integer;
+function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
 var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;
@@ -61,31 +61,30 @@ var
   fPos, len: integer;
   fp: TFileStream;
 begin
-  Form2.ListBox1.Items.Clear;
   try
     fp := TFileStream.Create(wavefile, fmOpenReadWrite);
     fp.ReadBuffer(waveFileHeader, SizeOf(SWaveFileHeader));
   except
     on EReadError do
     begin
-      Form2.ListBox1.Items.Add('読み込み失敗');
+      mes := '読み込み失敗';
       fp.Free;
     end;
     else
-      Form2.ListBox1.Items.Add('開けません');
+      mes := '開けません';
     result := -1;
     Exit;
   end;
   if CompareStr(waveFileHeader.hdrRiff, STR_RIFF) <> 0 then
   begin
-    Form2.ListBox1.Items.Add('RIFFフォーマットでない');
+    mes := 'RIFFフォーマットでない';
     result := -1;
     fp.Free;
     Exit;
   end;
   if CompareStr(waveFileHeader.hdrWave, STR_WAVE) <> 0 then
   begin
-    Form2.ListBox1.Items.Add('"WAVE"がない');
+    mes := '"WAVE"がない';
     result := -1;
     fp.Free;
     Exit;
@@ -107,7 +106,7 @@ begin
     if CompareStr(chank.hdrFmtData, STR_fmt) = 0 then
     begin
       len := chank.sizeOfFmtData;
-      Form2.ListBox1.Items.Add(Format('fmt の長さ%d[bytes]', [len]));
+      mes := mes + Format('fmt の長さ%d[bytes]', [len]);
       fPos := fp.Position;
       if readFmtChank(fp, waveFmtPcm) <> 0 then
       begin
@@ -133,13 +132,13 @@ begin
       else
         sp.sizeOfData := chank.sizeOfFmtData;
       sp.posOfData := fp.Position;
-      Form2.ListBox1.Items.Add(Format('dataの長さ:%d[bytes]', [sp.sizeOfData]));
+      mes := mes + Format('dataの長さ:%d[bytes]', [sp.sizeOfData]);
       break;
     end
     else
     begin
       len := chank.sizeOfFmtData;
-      Form2.ListBox1.Items.Add(chank.hdrFmtData + 'の長さ[bytes]' + len.ToString);
+      mes := mes + chank.hdrFmtData + 'の長さ[bytes]' + len.ToString;
       fPos := fp.Position;
       fp.Seek(len, soFromCurrent);
     end;
