@@ -5,22 +5,22 @@ interface
 uses
   System.Classes, System.SysUtils, spWav;
 
-function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm; out mes: string): integer;
+function readFmtChunk(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm;
+  out mes: string): integer;
 function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
 
 implementation
 
-uses Unit2;
-
-function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm; out mes: string): integer;
+function readFmtChunk(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm;
+  out mes: string): integer;
 var
   s: TStringList;
 begin
-  result := 0;
   try
+    fp.Position:=12;
     fp.ReadBuffer(waveFmtPcm, SizeOf(tWaveFormatPcm));
-    s:=TStringList.Create;
-    s.Add('データ形式：' + waveFmtPcm.formatTag.ToString);
+    s := TStringList.Create;
+    s.Add('データ形式：' + waveFmtPcm.formatTag);
     s.Add('チャンネル数：' + waveFmtPcm.channels.ToString);
     s.Add('サンプリング周波数：' + waveFmtPcm.sampleParSec.ToString);
     s.Add('バイト数　/　秒：' + waveFmtPcm.bytesPerSec.ToString);
@@ -34,10 +34,10 @@ begin
         s.Add('チャンネル数は' + channels.ToString);
         result := -1;
       end;
-      if formatTag <> 1 then
+      if formatTag <> 'fmt ' then
       begin
         s.Add('無圧縮のPCMのみ対象');
-        s.Add('フォーマット形式は' + formatTag.ToString);
+        s.Add('フォーマット形式は' + formatTag);
         result := -1;
       end;
       if bitsPerSample <> 16 then
@@ -47,7 +47,7 @@ begin
         result := -1;
       end;
     end;
-    mes:=s.Text;
+    mes := s.Text;
     s.Free;
   except
     on EReadError do
@@ -59,14 +59,14 @@ function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
 var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;
-  chank: tChank;
+  Chunk: tChunk;
   fPos, len: integer;
   fp: TFileStream;
   i: integer;
   s: string;
 begin
   try
-    fp := TFileStream.Create(wavefile, fmOpenReadWrite);
+    fp := TFileStream.Create(wavefile, fmOpenRead);
     fp.ReadBuffer(waveFileHeader, SizeOf(SWaveFileHeader));
   except
     on EReadError do
@@ -98,7 +98,7 @@ begin
   while True do
   begin
     try
-      fp.ReadBuffer(chank, SizeOf(tChank));
+      fp.ReadBuffer(Chunk, SizeOf(tChunk));
     except
       on EReadError do
       begin
@@ -107,13 +107,13 @@ begin
         break;
       end;
     end;
-    if CompareStr(chank.hdrFmtData, STR_fmt) = 0 then
+    if CompareStr(Chunk.hdrFmtData, STR_fmt) = 0 then
     begin
-      len := chank.sizeOfFmtData;
+      len := Chunk.sizeOfFmtData;
       mes := mes + Format('fmt の長さ%d[bytes]', [len]);
       fPos := fp.Position;
-      i:=readFmtChank(fp, waveFmtPcm,s);
-      mes:=mes+s;
+      i := readFmtChunk(fp, waveFmtPcm, s);
+      mes := mes + s;
       if i <> 0 then
       begin
         result := -1;
@@ -126,25 +126,25 @@ begin
       sp.bytesPerSec := waveFmtPcm.bytesPerSec;
       fp.Seek(fPos + len, soFromBeginning);
     end
-    else if CompareStr(chank.hdrFmtData, STR_data) = 0 then
+    else if CompareStr(Chunk.hdrFmtData, STR_data) = 0 then
     begin
-      if chank.sizeOfFmtData = 0 then
+      if Chunk.sizeOfFmtData = 0 then
       begin
         sp.sizeOfData := fp.Size - fp.Position;
         fp.Position := fPos + len;
-        chank.sizeOfFmtData := sp.sizeOfData;
-        fp.WriteBuffer(chank, SizeOf(tChank));
+        Chunk.sizeOfFmtData := sp.sizeOfData;
+        fp.WriteBuffer(Chunk, SizeOf(tChunk));
       end
       else
-        sp.sizeOfData := chank.sizeOfFmtData;
+        sp.sizeOfData := Chunk.sizeOfFmtData;
       sp.posOfData := fp.Position;
       mes := mes + Format('dataの長さ:%d[bytes]', [sp.sizeOfData]);
       break;
     end
     else
     begin
-      len := chank.sizeOfFmtData;
-      mes := mes + chank.hdrFmtData + 'の長さ[bytes]' + len.ToString;
+      len := Chunk.sizeOfFmtData;
+      mes := mes + Chunk.hdrFmtData + 'の長さ[bytes]' + len.ToString;
       fPos := fp.Position;
       fp.Seek(len, soFromCurrent);
     end;

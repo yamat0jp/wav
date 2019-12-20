@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
-  FMX.Media, FMX.Layouts, FMX.Objects, FMX.ListBox;
+  FMX.Media, FMX.Layouts, FMX.Objects, FMX.ListBox, spWav;
 
 type
   TForm1 = class(TForm)
@@ -44,6 +44,7 @@ type
     { public êÈåæ }
     Mic: TAudioCaptureDevice;
     Count: integer;
+    procedure repair(fp: TFileStream; sp: SpParam);
   end;
 
 var
@@ -53,7 +54,7 @@ implementation
 
 {$R *.fmx}
 
-uses spWav, wav, effect, selectFile, WriteHeader;
+uses wav, effect, selectFile, WriteHeader;
 
 procedure TForm1.StartButtonClick(Sender: TObject);
 begin
@@ -111,14 +112,20 @@ begin
       end;
     1:
       begin
-        fp := TFileStream.Create('temp.wav', fmOpenRead);
+        fp := TFileStream.Create('temp.wav', fmOpenReadWrite);
         try
           fp.ReadBuffer(wh, SizeOf(wh));
           ListBox1.Items.Clear;
           ListBox1.Items.Add(wh.hdrRiff);
           ListBox1.Items.Add(wh.hdrWave);
           ListBox1.Items.Add(wh.hdrFmt);
-          ListBox1.Items.Add(wh.hdrData);
+          if (wh.hdrWave = 'AVI ') and
+            (MessageDlg('repaire?', TMsgDlgType.mtConfirmation,
+            [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) = mrOK) then
+          begin
+            sp.sizeOfData := fp.Size - 44;
+            repair(fp, sp);
+          end;
         finally
           fp.Free;
         end;
@@ -127,7 +134,7 @@ begin
       begin
         fp := TFileStream.Create('temp.wav', fmOpenRead);
         try
-          readFmtChank(fp, wf, s);
+          readFmtChunk(fp, wf, s);
         finally
           fp.Free;
         end;
@@ -146,15 +153,9 @@ begin
   ArcDial1.Value := MediaPlayer1.Volume;
   if FileExists('temp.wav') = false then
   begin
-    sp.channels := 2;
-    sp.samplePerSec := 44100;
-    sp.bytesPerSec := 176400;
-    sp.bitsPerSample := 16;
-    sp.posOfData := 44;
-    sp.sizeOfData := 0;
     s := TFileStream.Create('temp.wav', fmCreate);
     try
-      waveHeaderWrite(s, sp);
+      repair(s, sp);
     finally
       s.Free;
     end;
@@ -211,6 +212,15 @@ begin
     StartButton.IsPressed := true;
     Image1.Opacity := 1;
   end;
+end;
+
+procedure TForm1.repair(fp: TFileStream; sp: SpParam);
+begin
+  sp.channels := 2;
+  sp.samplePerSec := 44100;
+  sp.bytesPerSec := 176400;
+  sp.bitsPerSample := 16;
+  sp.posOfData := waveHeaderWrite(fp, sp);
 end;
 
 end.

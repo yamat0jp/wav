@@ -5,47 +5,49 @@ interface
 type
   SWaveFileHeader = packed record
     hdrRiff: array [0 .. 3] of AnsiChar;
-    sizeOfFile: LongWord;
+    sizeOfFile: UInt32;
     hdrWave: array [0 .. 3] of AnsiChar;
   end;
 
-  tChank = packed record
+  tChunk = packed record
     hdrFmtData: array [0 .. 3] of AnsiChar;
-    sizeOfFmtData: LongWord;
+    sizeOfFmtData: UInt32;
   end;
 
   tWaveFormatPcm = packed record
-    formatTag: SmallInt;
-    channels: SmallInt;
-    sampleParSec: LongWord;
-    bytesPerSec: LongWord;
-    blockAlign: SmallInt;
-    bitsPerSample: SmallInt;
+    formatTag: array [0..3] of AnsiChar;
+    formatSize: UInt32;
+    formatCode: UInt16;
+    channels: UInt16;
+    sampleParSec: UInt32;
+    bytesPerSec: UInt32;
+    blockAlign: UInt16;
+    bitsPerSample: UInt16;
   end;
 
   WrSWaveFileHeader = packed record
     hdrRiff: array [0..3] of AnsiChar;
-    sizeOfFile: LongWord;
+    sizeOfFile: UInt32;
     hdrWave: array [0..3] of AnsiChar;
     hdrFmt: array [0..3] of AnsiChar;
-    sizeOfFmt: LongWord;
+    sizeOfFmt: UInt32;
     stWaveFormat: tWaveFormatPCM;
     hdrData: array [0..3] of AnsiChar;
-    sizeOfData: LongWord;
+    sizeOfData: UInt32;
   end;
 
-  SpParam = packed record
-    samplePerSec: LongWord;
+  SpParam = record
+    samplePerSec: UInt32;
     bitsPerSample: Byte;
-    sizeOfData: LongWord;
+    sizeOfData: UInt32;
     channels: Byte;
-    bytesPerSec: LongWord;
-    posOfData: LongInt;
-    startpos: LongInt;
-    endpos: LongInt;
-    cycleuSec: LongInt;
+    bytesPerSec: UInt32;
+    posOfData: UInt32;
+    startpos: UInt32;
+    endpos: UInt32;
+    cycleuSec: UInt32;
     pWav: Pointer;
-    cyclicSec: integer;
+    cyclicSec: UInt32;
   end;
 
 const

@@ -19,7 +19,7 @@ var
   i, a, b, pmin, pmax: integer;
   len, temp_size, offset0, offset1, p, q: integer;
   m, ma, pitch, rate: Single;
-  pMem, pCpy, pRes: array of SmallInt;
+  pMem, pCpy, pRes: array of Int16;
   s: TMemoryStream;
   r: array of Single;
 begin

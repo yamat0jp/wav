@@ -8,7 +8,7 @@ function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
 
 implementation
 
-uses effect, Unit2;
+uses effect;
 
 function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
 var
@@ -21,7 +21,7 @@ begin
   wrWavHdr.hdrWave := STR_WAVE;
   wrWavHdr.hdrFmt := STR_fmt;
   wrWavHdr.sizeOfFmt := SizeOf(tWaveFormatPCM);
-  s.formatTag := 1;
+  s.formatTag := 'fmt ';
   s.channels := sp.channels;
   s.sampleParSec := sp.samplePerSec;
   bytes := sp.bitsPerSample div 8;
@@ -31,6 +31,7 @@ begin
   wrWavHdr.stWaveFormat := s;
   wrWavHdr.hdrData := STR_data;
   wrWavHdr.sizeOfData := sp.sizeOfData;
+  fp.Position:=0;
   fp.WriteBuffer(wrWavHdr, SizeOf(WrSWaveFileHeader));
   result := fp.Position;
 end;
