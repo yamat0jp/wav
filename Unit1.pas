@@ -53,7 +53,7 @@ implementation
 
 {$R *.fmx}
 
-uses spWav, wav, effect, selectFile;
+uses spWav, wav, effect, selectFile, WriteHeader;
 
 procedure TForm1.StartButtonClick(Sender: TObject);
 begin
@@ -137,10 +137,28 @@ begin
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  sp: SpParam;
+  s: TFileStream;
 begin
   Mic := TCaptureDeviceManager.Current.DefaultAudioCaptureDevice;
   Mic.FileName := 'temp.wav';
   ArcDial1.Value := MediaPlayer1.Volume;
+  if FileExists('temp.wav') = false then
+  begin
+    sp.channels := 2;
+    sp.samplePerSec := 44100;
+    sp.bytesPerSec := 176400;
+    sp.bitsPerSample := 16;
+    sp.posOfData := 44;
+    sp.sizeOfData := 0;
+    s := TFileStream.Create('temp.wav', fmCreate);
+    try
+      waveHeaderWrite(s, sp);
+    finally
+      s.Free;
+    end;
+  end;
 end;
 
 procedure TForm1.PauseButtonClick(Sender: TObject);

@@ -126,14 +126,14 @@ object Form1: TForm1
     end
   end
   object MediaPlayer1: TMediaPlayer
-    Left = 240
-    Top = 168
+    Left = 336
+    Top = 224
   end
   object Button1: TButton
     Position.X = 224.000000000000000000
     Position.Y = 168.000000000000000000
     TabOrder = 5
-    Text = 'Button1'
+    Text = #23455#34892
     OnClick = Button1Click
   end
   object ProgressBar1: TProgressBar
@@ -155,7 +155,7 @@ object Form1: TForm1
   end
   object SaveDialog1: TSaveDialog
     Left = 336
-    Top = 168
+    Top = 296
   end
   object ComboBox1: TComboBox
     Items.Strings = (
@@ -170,6 +170,6 @@ object Form1: TForm1
   object Timer1: TTimer
     OnTimer = Timer1Timer
     Left = 336
-    Top = 240
+    Top = 368
   end
 end
