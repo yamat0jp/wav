@@ -143,7 +143,7 @@ begin
       end;
     3:
     begin
-      wave:=TSpWave.Create;
+      wave:=TSpWave.Create('sample.wav',fmCreate);
       try
         wave.main(3,'test');
       finally

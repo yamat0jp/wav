@@ -5,16 +5,12 @@ interface
 uses spWav, System.Classes, System.SysUtils;
 
 type
-  TMyWave = class
+  TMyWave = class(TFileStream)
   private
-    Ffp: TFileStream;
     Fsp: SpParam;
   protected
-    property fp: TFileStream read Ffp write Ffp;
     property sp: SpParam read Fsp write Fsp;
   public
-    constructor Create;
-    destructor Destroy; override;
     function main(argc: integer; argv: string): integer; virtual;
   end;
 
@@ -33,7 +29,7 @@ uses WriteHeader;
 function TSpWave.main(argc: integer; argv: string): integer;
 begin
   inherited;
-  result := waveHeaderWrite(fp, sp);
+  result := waveHeaderWrite(Self, sp);
 end;
 
 function TSpWave.WriteWaveData: integer;
@@ -67,7 +63,7 @@ begin
       outdata[0] := -32768;
       outdata[1] := -32768;
     end;
-    fp.WriteBuffer(outdata,SizeOf(outdata));
+    WriteBuffer(outdata,SizeOf(outdata));
     inc(curSampling, deltaPriod);
   end;
   result := 0;
@@ -75,23 +71,13 @@ end;
 
 { TMyWave }
 
-constructor TMyWave.Create;
-begin
-  Ffp := TFileStream.Create('sample.wav', fmCreate);
-end;
-
-destructor TMyWave.Destroy;
-begin
-  Ffp.Free;
-  inherited;
-end;
-
 function TMyWave.main(argc: integer; argv: string): integer;
 var
   totalLength: integer;
   s: SpParam;
   t: TStringList;
 begin
+  result:=-1;
   t:=TStringList.Create;
   try
     t.StrictDelimiter:=false;
