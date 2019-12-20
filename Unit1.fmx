@@ -15,7 +15,7 @@ object Form1: TForm1
     ItemWidth = 400.000000000000000000
     Orientation = Horizontal
     Size.Width = 400.000000000000000000
-    Size.Height = 201.000000000000000000
+    Size.Height = 145.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     object FlowLayout1: TFlowLayout
@@ -23,8 +23,8 @@ object Form1: TForm1
       Size.Height = 64.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
-      Justify = Center
-      JustifyLastLine = Left
+      Justify = Justify
+      JustifyLastLine = Justify
       FlowDirection = LeftToRight
       object Label1: TLabel
         Size.Width = 200.000000000000000000
@@ -84,11 +84,12 @@ object Form1: TForm1
       Size.Height = 64.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
-      Justify = Left
-      JustifyLastLine = Left
+      Justify = Justify
+      JustifyLastLine = Center
       FlowDirection = LeftToRight
       object ArcDial1: TArcDial
         Enabled = False
+        Position.X = 71.500000000000000000
         Size.Width = 65.000000000000000000
         Size.Height = 65.000000000000000000
         Size.PlatformDefault = False
@@ -99,7 +100,7 @@ object Form1: TForm1
         MultiResBitmap = <
           item
           end>
-        Position.X = 65.000000000000000000
+        Position.X = 136.500000000000000000
         Size.Width = 64.000000000000000000
         Size.Height = 65.000000000000000000
         Size.PlatformDefault = False
@@ -108,7 +109,7 @@ object Form1: TForm1
         MultiResBitmap = <
           item
           end>
-        Position.X = 129.000000000000000000
+        Position.X = 200.500000000000000000
         Size.Width = 64.000000000000000000
         Size.Height = 65.000000000000000000
         Size.PlatformDefault = False
@@ -117,7 +118,7 @@ object Form1: TForm1
         MultiResBitmap = <
           item
           end>
-        Position.X = 193.000000000000000000
+        Position.X = 264.500000000000000000
         Size.Width = 64.000000000000000000
         Size.Height = 65.000000000000000000
         Size.PlatformDefault = False
@@ -129,22 +130,22 @@ object Form1: TForm1
     Top = 168
   end
   object Button1: TButton
-    Position.X = 160.000000000000000000
-    Position.Y = 232.000000000000000000
+    Position.X = 224.000000000000000000
+    Position.Y = 168.000000000000000000
     TabOrder = 5
     Text = 'Button1'
     OnClick = Button1Click
   end
   object ProgressBar1: TProgressBar
     Orientation = Horizontal
-    Position.X = 152.000000000000000000
-    Position.Y = 288.000000000000000000
+    Position.X = 160.000000000000000000
+    Position.Y = 224.000000000000000000
   end
   object ListBox1: TListBox
     Position.X = 104.000000000000000000
-    Position.Y = 336.000000000000000000
+    Position.Y = 272.000000000000000000
     Size.Width = 200.000000000000000000
-    Size.Height = 120.000000000000000000
+    Size.Height = 184.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 9
     DisableFocusEffect = True
@@ -153,7 +154,22 @@ object Form1: TForm1
     DefaultItemStyles.GroupFooterStyle = ''
   end
   object SaveDialog1: TSaveDialog
-    Left = 312
+    Left = 336
     Top = 168
+  end
+  object ComboBox1: TComboBox
+    Items.Strings = (
+      'execute'
+      'head'
+      'data')
+    ItemIndex = 0
+    Position.X = 88.000000000000000000
+    Position.Y = 168.000000000000000000
+    TabOrder = 14
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 336
+    Top = 240
   end
 end

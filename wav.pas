@@ -5,48 +5,50 @@ interface
 uses
   System.Classes, System.SysUtils, spWav;
 
-function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
+function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm; out mes: string): integer;
 function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
 
 implementation
 
 uses Unit2;
 
-function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm): integer;
+function readFmtChank(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm; out mes: string): integer;
+var
+  s: TStringList;
 begin
   result := 0;
   try
     fp.ReadBuffer(waveFmtPcm, SizeOf(tWaveFormatPcm));
-    with Form2.ListBox1.Items do
-    begin
-      Add('データ形式：' + waveFmtPcm.formatTag.ToString);
-      Add('チャンネル数：' + waveFmtPcm.channels.ToString);
-      Add('サンプリング周波数：' + waveFmtPcm.sampleParSec.ToString);
-      Add('バイト数　/　秒：' + waveFmtPcm.bytesPerSec.ToString);
-      Add('バイト数 Ｘ チャンネル数：' + waveFmtPcm.blockAlign.ToString);
-      Add('ビット数　/　サンプル：' + waveFmtPcm.bitsPerSample.ToString);
-    end;
+    s:=TStringList.Create;
+    s.Add('データ形式：' + waveFmtPcm.formatTag.ToString);
+    s.Add('チャンネル数：' + waveFmtPcm.channels.ToString);
+    s.Add('サンプリング周波数：' + waveFmtPcm.sampleParSec.ToString);
+    s.Add('バイト数　/　秒：' + waveFmtPcm.bytesPerSec.ToString);
+    s.Add('バイト数 Ｘ チャンネル数：' + waveFmtPcm.blockAlign.ToString);
+    s.Add('ビット数　/　サンプル：' + waveFmtPcm.bitsPerSample.ToString);
     with waveFmtPcm do
     begin
       if channels <> 2 then
       begin
-        Form2.ListBox1.Items.Add('ステレオファイルを対象としています');
-        Form2.ListBox1.Items.Add('チャンネル数は' + channels.ToString);
-        // result := -1;
+        s.Add('ステレオファイルを対象としています');
+        s.Add('チャンネル数は' + channels.ToString);
+        //  result := -1;
       end;
       if formatTag <> 1 then
       begin
-        Form2.ListBox1.Items.Add('無圧縮のPCMのみ対象');
-        Form2.ListBox1.Items.Add('フォーマット形式は' + formatTag.ToString);
+        s.Add('無圧縮のPCMのみ対象');
+        s.Add('フォーマット形式は' + formatTag.ToString);
         result := -1;
       end;
       if bitsPerSample <> 16 then
       begin
-        Form2.ListBox1.Items.Add('16ビットのみ対象');
-        Form2.ListBox1.Items.Add('bit/secは' + bitsPerSample.ToString);
+        s.Add('16ビットのみ対象');
+        s.Add('bit/secは' + bitsPerSample.ToString);
         result := -1;
       end;
     end;
+    mes:=s.Text;
+    s.Free;
   except
     on EReadError do
       result := -1;
@@ -60,6 +62,8 @@ var
   chank: tChank;
   fPos, len: integer;
   fp: TFileStream;
+  i: integer;
+  s: string;
 begin
   try
     fp := TFileStream.Create(wavefile, fmOpenReadWrite);
@@ -108,7 +112,9 @@ begin
       len := chank.sizeOfFmtData;
       mes := mes + Format('fmt の長さ%d[bytes]', [len]);
       fPos := fp.Position;
-      if readFmtChank(fp, waveFmtPcm) <> 0 then
+      i:=readFmtChank(fp, waveFmtPcm,s);
+      mes:=mes+s;
+      if i <> 0 then
       begin
         result := -1;
         fp.Free;

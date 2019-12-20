@@ -28,6 +28,8 @@ type
     ProgressBar1: TProgressBar;
     SaveDialog1: TSaveDialog;
     ListBox1: TListBox;
+    ComboBox1: TComboBox;
+    Timer1: TTimer;
     procedure PauseButtonClick(Sender: TObject);
     procedure StartButtonClick(Sender: TObject);
     procedure StopButtonClick(Sender: TObject);
@@ -35,11 +37,13 @@ type
     procedure FormCreate(Sender: TObject);
     procedure ArcDial1Change(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private êÈåæ }
   public
     { public êÈåæ }
     Mic: TAudioCaptureDevice;
+    Count: integer;
   end;
 
 var
@@ -56,16 +60,13 @@ begin
   StartButton.HitTest := false;
   if PauseButton.IsPressed = true then
     Exit;
+  if Sender = nil then
+    MediaPlayer1.FileName := SaveDialog1.FileName
+  else
+    MediaPlayer1.FileName := Mic.FileName;
   if (MediaPlayer1.State = TMediaState.Stopped) and (MediaPlayer1.Media <> nil)
   then
-    if MediaPlayer1.State = TMediaState.Stopped then
-    begin
-      if Sender = nil then
-        MediaPlayer1.FileName := SaveDialog1.FileName
-      else
-        MediaPlayer1.FileName := Mic.FileName;
-      MediaPlayer1.Play;
-    end;
+    MediaPlayer1.Play;
 end;
 
 procedure TForm1.ArcDial1Change(Sender: TObject);
@@ -79,28 +80,60 @@ var
   pMem: TMemoryStream;
   s: string;
   i: integer;
+  wh: WrSWaveFileHeader;
+  wf: tWaveFormatPCM;
+  fp: TFileStream;
 begin
-  if FileExists('temp.wav') = false then
-    Exit;
-  i:=wavHdrRead(PChar(Mic.FileName), sp, s);
-  ListBox1.Items.Text := s;
-  if i < 0 then
-    Exit;
-  if readWav(Mic.FileName, pMem) = false then
-    Exit;
-  sp.pWav := pMem.Memory;
-  if effectWav(sp) = 0 then
-  begin
-    pMem.SaveToFile('effect.wav');
-    SaveDialog1.Filter := Mic.FilterString;
-    if SaveDialog1.Execute = true then
-    begin
-      pMem.SaveToFile(SaveDialog1.FileName);
-      StartButtonClick(Sender);
-    end;
+  case ComboBox1.ItemIndex of
+    0:
+      begin
+        if FileExists('temp.wav') = false then
+          Exit;
+        i := wavHdrRead(PChar(Mic.FileName), sp, s);
+        ListBox1.Items.Text := s;
+        if i < 0 then
+          Exit;
+        if readWav(Mic.FileName, pMem) = false then
+          Exit;
+        sp.pWav := pMem.Memory;
+        if effectWav(sp) = 0 then
+        begin
+          pMem.SaveToFile('effect.wav');
+          SaveDialog1.Filter := Mic.FilterString;
+          if SaveDialog1.Execute = true then
+          begin
+            pMem.SaveToFile(SaveDialog1.FileName);
+            StartButtonClick(nil);
+          end;
+        end;
+        pMem.Free;
+        Finalize(sp.pWav^);
+      end;
+    1:
+      begin
+        fp := TFileStream.Create('temp.wav', fmOpenRead);
+        try
+          fp.ReadBuffer(wh, SizeOf(wh));
+          ListBox1.Items.Clear;
+          ListBox1.Items.Add(wh.hdrRiff);
+          ListBox1.Items.Add(wh.hdrWave);
+          ListBox1.Items.Add(wh.hdrFmt);
+          ListBox1.Items.Add(wh.hdrData);
+        finally
+          fp.Free;
+        end;
+      end;
+    2:
+      begin
+        fp := TFileStream.Create('temp.wav', fmOpenRead);
+        try
+          readFmtChank(fp, wf, s);
+        finally
+          fp.Free;
+        end;
+        ListBox1.Items.Text := s;
+      end;
   end;
-  pMem.Free;
-  Finalize(sp.pWav^);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -136,6 +169,20 @@ begin
   StartButton.IsPressed := false;
   RecordButton.IsPressed := false;
   StartButton.HitTest := true;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+var
+  i: Int64;
+begin
+  if MediaPlayer1.State = TMediaState.Playing then
+  begin
+    i := MediaPlayer1.CurrentTime;
+    if (i > 0) and (Count = i) then
+      StopButtonClick(Sender)
+    else
+      Count := i;
+  end;
 end;
 
 procedure TForm1.RecordButtonClick(Sender: TObject);
