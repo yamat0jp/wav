@@ -4,13 +4,13 @@ interface
 
 uses System.Classes, System.SysUtils, spWav;
 
-function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
+function waveHeaderWrite(fp: TStream; const sp: SpParam): integer;
 
 implementation
 
 uses effect;
 
-function waveHeaderWrite(fp: TFileStream; const sp: SpParam): integer;
+function waveHeaderWrite(fp: TStream; const sp: SpParam): integer;
 var
   bytes: Byte;
   wrWavHdr: WrSWaveFileHeader;

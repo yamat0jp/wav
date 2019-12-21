@@ -109,7 +109,6 @@ begin
           end;
         end;
         pMem.Free;
-        Finalize(sp.pWav^);
       end;
     1:
       begin
@@ -123,10 +122,7 @@ begin
           if (wh.hdrWave = 'AVI ') and
             (MessageDlg('repaire?', TMsgDlgType.mtConfirmation,
             [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) = mrOK) then
-          begin
-            sp.sizeOfData := fp.Size - 44;
             repair(fp, sp);
-          end;
         finally
           fp.Free;
         end;
@@ -161,15 +157,6 @@ begin
   Mic := TCaptureDeviceManager.Current.DefaultAudioCaptureDevice;
   Mic.FileName := 'temp.wav';
   ArcDial1.Value := MediaPlayer1.Volume;
-  if FileExists('temp.wav') = false then
-  begin
-    s := TFileStream.Create('temp.wav', fmCreate);
-    try
-      repair(s, sp);
-    finally
-      s.Free;
-    end;
-  end;
 end;
 
 procedure TForm1.PauseButtonClick(Sender: TObject);
@@ -225,12 +212,27 @@ begin
 end;
 
 procedure TForm1.repair(fp: TFileStream; sp: SpParam);
+var
+  s: TMemoryStream;
+  i: integer;
 begin
   sp.channels := 2;
   sp.samplePerSec := 44100;
   sp.bytesPerSec := 176400;
   sp.bitsPerSample := 16;
-  sp.posOfData := waveHeaderWrite(fp, sp);
+  fp.Position:=28;
+  fp.ReadBuffer(i,4);
+  fp.Position:=i;
+  sp.sizeOfData:=fp.Size-fp.Position;
+  s:=TMemoryStream.Create;
+  try
+    waveHeaderWrite(s,sp);
+    s.CopyFrom(fp,sp.sizeOfData);
+    fp.Position:=0;
+    fp.WriteBuffer(s.Memory,s.Size);
+  finally
+    s.Free;
+  end;
 end;
 
 end.

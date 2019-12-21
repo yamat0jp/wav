@@ -58,13 +58,13 @@ begin
     end;
     while offset1 + 2 * pmax < len do
     begin
-      for i := 0 to p do
+      for i := 1 to p do
       begin
         pCpy[offset1 + i] := pRes[offset0 + i];
         pCpy[offset1 + i + p] :=
           trunc((pRes[offset0 + p + i] * (p - i) + pRes[offset0 + i] * i) / p);
       end;
-      q := trunc(rate * p / (1.0 - rate) + 0.5);
+      q := Math.Ceil(rate * p / (1.0 - rate) + 0.5);
       for i := p to q - 1 do
       begin
         if offset1 + p + i >= len then
@@ -91,10 +91,10 @@ begin
   end;
   s := TMemoryStream.Create;
   try
-    s.Write(sp.pWav^, sp.posOfData);
-    s.Write(Pointer(pMem)^, sp.sizeOfData - sp.posOfData);
+    s.WriteBuffer(sp.pWav^, sp.posOfData);
+    s.WriteBuffer(Pointer(pMem)^, sp.sizeOfData - sp.posOfData);
     s.Position := 0;
-    s.Read(sp.pWav^, s.Size);
+    s.ReadBuffer(sp.pWav^, s.Size);
   finally
     s.Free;
   end;
