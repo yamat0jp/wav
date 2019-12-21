@@ -145,7 +145,7 @@ begin
     begin
       wave:=TSpWave.Create('sample.wav',fmCreate);
       try
-        wave.main(3,'10 20000');
+        wave.main('10 20000');
       finally
         wave.Free;
       end;

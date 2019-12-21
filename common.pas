@@ -11,13 +11,13 @@ type
   protected
     property sp: SpParam read Fsp write Fsp;
   public
-    function main(argc: integer; argv: string): integer; virtual;
+    function main(argv: string): integer; virtual;
   end;
 
   TSpWave = class(TMyWave)
   public
-    function main(argc: integer; argv: string): integer; override;
-    function WriteWaveData: integer;
+    function main(argv: string): integer; override;
+    function WriteWaveData(ms: TMemoryStream): integer;
   end;
 
 implementation
@@ -26,16 +26,24 @@ uses WriteHeader;
 
 { TSpWave }
 
-function TSpWave.main(argc: integer; argv: string): integer;
+function TSpWave.main(argv: string): integer;
+var
+  s: TMemoryStream;
 begin
   inherited;
   result := waveHeaderWrite(Self, sp);
   if result = -1 then
     Exit;
-  result := WriteWaveData;
+  s:=TMemoryStream.Create;
+  try
+    result := WriteWaveData(s);
+    CopyFrom(s,0);
+  finally
+    s.Free;
+  end;
 end;
 
-function TSpWave.WriteWaveData: integer;
+function TSpWave.WriteWaveData(ms: TMemoryStream): integer;
 var
   tempSamplePeriod: Single;
   curSampling, samplePerPriod, deltaPriod: integer;
@@ -66,7 +74,7 @@ begin
       outdata[0] := -32768;
       outdata[1] := -32768;
     end;
-    WriteBuffer(outdata, SizeOf(outdata));
+    ms.WriteBuffer(outdata, SizeOf(outdata));
     inc(curSampling, deltaPriod);
   end;
   result := 0;
@@ -74,7 +82,7 @@ end;
 
 { TMyWave }
 
-function TMyWave.main(argc: integer; argv: string): integer;
+function TMyWave.main(argv: string): integer;
 var
   totalLength: integer;
   s: SpParam;
@@ -85,8 +93,6 @@ begin
   try
     t.StrictDelimiter := false;
     t.DelimitedText := argv;
-//    if argc <> t.Count then
-  //    Exit;
     totalLength := StrToInt(t[0]);
     s.cycleuSec := StrToInt(t[1]);
   finally
