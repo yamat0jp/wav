@@ -15,9 +15,7 @@ type
   end;
 
   tWaveFormatPcm = packed record
-    formatTag: array [0..3] of AnsiChar;
-    formatSize: UInt32;
-    formatCode: UInt16;
+    formatTag: UInt16;
     channels: UInt16;
     sampleParSec: UInt32;
     bytesPerSec: UInt32;

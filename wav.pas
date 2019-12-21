@@ -17,10 +17,10 @@ var
   s: TStringList;
 begin
   try
-    fp.Position:=12;
+    fp.Position:=20*8;
     fp.ReadBuffer(waveFmtPcm, SizeOf(tWaveFormatPcm));
     s := TStringList.Create;
-    s.Add('データ形式：' + waveFmtPcm.formatTag);
+    s.Add('データ形式：' + waveFmtPcm.formatTag.ToString);
     s.Add('チャンネル数：' + waveFmtPcm.channels.ToString);
     s.Add('サンプリング周波数：' + waveFmtPcm.sampleParSec.ToString);
     s.Add('バイト数　/　秒：' + waveFmtPcm.bytesPerSec.ToString);
@@ -34,10 +34,10 @@ begin
         s.Add('チャンネル数は' + channels.ToString);
         result := -1;
       end;
-      if formatTag <> 'fmt ' then
+      if formatTag <> 1 then
       begin
         s.Add('無圧縮のPCMのみ対象');
-        s.Add('フォーマット形式は' + formatTag);
+        s.Add('フォーマット形式は' + formatTag.ToString);
         result := -1;
       end;
       if bitsPerSample <> 16 then

@@ -21,7 +21,7 @@ begin
   wrWavHdr.hdrWave := STR_WAVE;
   wrWavHdr.hdrFmt := STR_fmt;
   wrWavHdr.sizeOfFmt := SizeOf(tWaveFormatPCM);
-  s.formatTag := 'fmt ';
+  s.formatTag := 1;
   s.channels := sp.channels;
   s.sampleParSec := sp.samplePerSec;
   bytes := sp.bitsPerSample div 8;

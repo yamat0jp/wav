@@ -30,6 +30,9 @@ function TSpWave.main(argc: integer; argv: string): integer;
 begin
   inherited;
   result := waveHeaderWrite(Self, sp);
+  if result = -1 then
+    Exit;
+  result := WriteWaveData;
 end;
 
 function TSpWave.WriteWaveData: integer;
@@ -41,7 +44,7 @@ var
 begin
   result := -1;
   tempSamplePeriod := sp.samplePerSec * sp.cycleuSec;
-  // tempSamplePeriod:=tempSamplePeriod/1000000.0f*2.0f;
+  tempSamplePeriod := tempSamplePeriod / 1000000.0 * 2.0;
   samplePerPriod := Trunc(tempSamplePeriod);
   if samplePerPriod <= 0 then
     Exit;
@@ -63,7 +66,7 @@ begin
       outdata[0] := -32768;
       outdata[1] := -32768;
     end;
-    WriteBuffer(outdata,SizeOf(outdata));
+    WriteBuffer(outdata, SizeOf(outdata));
     inc(curSampling, deltaPriod);
   end;
   result := 0;
@@ -77,15 +80,15 @@ var
   s: SpParam;
   t: TStringList;
 begin
-  result:=-1;
-  t:=TStringList.Create;
+  result := -1;
+  t := TStringList.Create;
   try
-    t.StrictDelimiter:=false;
-    t.DelimitedText:=argv;
-    if argc <> t.Count then
-      Exit;
-    totalLength:=StrToInt(t[1]);
-    s.cycleuSec:=StrToInt(t[2]);
+    t.StrictDelimiter := false;
+    t.DelimitedText := argv;
+//    if argc <> t.Count then
+  //    Exit;
+    totalLength := StrToInt(t[0]);
+    s.cycleuSec := StrToInt(t[1]);
   finally
     t.Free;
   end;
@@ -97,7 +100,7 @@ begin
     sizeOfData := (bitsPerSample div 8) * channels * samplePerSec * totalLength;
   end;
   sp := s;
-  result:=1;
+  result := 1;
 end;
 
 end.
