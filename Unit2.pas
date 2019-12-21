@@ -57,7 +57,7 @@ begin
   end;
   ListBox1.Clear;
   MediaPlayer1.Close;
-  if wavHdrRead(PChar(fileName), sp, s) < 0 then
+  if wavHdrRead(fileName, sp, s) < 0 then
     Exit;
   if readWav(fileName, pMem) = false then
     Exit;
@@ -80,7 +80,6 @@ begin
     end;
   end;
   pMem.Free;
-  Finalize(sp.pWav^);
   ListBox1.Items.Add(s);
 end;
 

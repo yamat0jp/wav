@@ -7,7 +7,7 @@ uses
 
 function readFmtChunk(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm;
   out mes: string): integer;
-function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
+function wavHdrRead(wavefile: string; var sp: SpParam; out mes: string): integer;
 
 implementation
 
@@ -56,7 +56,7 @@ begin
   end;
 end;
 
-function wavHdrRead(wavefile: PChar; var sp: SpParam; out mes: string): integer;
+function wavHdrRead(wavefile: string; var sp: SpParam; out mes: string): integer;
 var
   waveFileHeader: SWaveFileHeader;
   waveFmtPcm: tWaveFormatPcm;
@@ -134,7 +134,7 @@ begin
         sp.sizeOfData := fp.Size - fp.Position;
         fp.Position := fPos + len;
         Chunk.sizeOfFmtData := sp.sizeOfData;
-        fp.WriteBuffer(Chunk, SizeOf(tChunk));
+        fp.Write(Chunk, SizeOf(tChunk));
       end
       else
         sp.sizeOfData := Chunk.sizeOfFmtData;

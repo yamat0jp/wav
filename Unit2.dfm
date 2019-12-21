@@ -11,6 +11,9 @@ object Form2: TForm2
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  DesignSize = (
+    635
+    299)
   PixelsPerInch = 96
   TextHeight = 13
   object SpeedButton1: TSpeedButton
@@ -56,6 +59,7 @@ object Form2: TForm2
     Top = 120
     Width = 170
     Height = 161
+    Anchors = [akLeft, akTop, akRight]
     ItemHeight = 13
     TabOrder = 3
   end

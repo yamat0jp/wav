@@ -150,9 +150,6 @@ begin
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-  sp: SpParam;
-  s: TFileStream;
 begin
   Mic := TCaptureDeviceManager.Current.DefaultAudioCaptureDevice;
   Mic.FileName := 'temp.wav';

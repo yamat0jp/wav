@@ -13,20 +13,18 @@ uses Unit2;
 function readWav(const fName: string; out pMem: TMemoryStream): Boolean;
 var
   f: TFileStream;
-  sizeOfFile: integer;
 begin
   result := false;
   if FileExists(fName) = false then
     Exit;
   f := TFileStream.Create(fName, fmOpenRead);
   try
-    sizeOfFile := f.Size;
     pMem := TMemoryStream.Create;
     pMem.CopyFrom(f, 0);
     result := true;
-  except
+  finally
+    f.Free;
   end;
-  f.Free;
 end;
 
 end.
