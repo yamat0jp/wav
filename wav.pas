@@ -16,8 +16,9 @@ function readFmtChunk(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm;
 var
   s: TStringList;
 begin
+  result:=0;
   try
-    fp.Position:=20*8;
+    fp.Position:=20;
     fp.ReadBuffer(waveFmtPcm, SizeOf(tWaveFormatPcm));
     s := TStringList.Create;
     s.Add('データ形式：' + waveFmtPcm.formatTag.ToString);
@@ -65,8 +66,8 @@ var
   i: integer;
   s: string;
 begin
+  fp := TFileStream.Create(wavefile, fmOpenRead);
   try
-    fp := TFileStream.Create(wavefile, fmOpenRead);
     fp.ReadBuffer(waveFileHeader, SizeOf(SWaveFileHeader));
   except
     on EReadError do
@@ -104,7 +105,7 @@ begin
       begin
         result := 0;
         fp.Free;
-        break;
+        Exit;
       end;
     end;
     if CompareStr(Chunk.hdrFmtData, STR_fmt) = 0 then
