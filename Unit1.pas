@@ -6,7 +6,8 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
-  FMX.Media, FMX.Layouts, FMX.Objects, FMX.ListBox, spWav;
+  FMX.Media, FMX.Layouts, FMX.Objects, FMX.ListBox, spWav,
+  FMX.Controls.Presentation;
 
 type
   TForm1 = class(TForm)
@@ -44,7 +45,7 @@ type
     { public êÈåæ }
     Mic: TAudioCaptureDevice;
     Count: integer;
-    procedure repair(fp: TFileStream; sp: SpParam);
+    procedure repair(fp: TFileStream);
   end;
 
 var
@@ -112,7 +113,7 @@ begin
       end;
     1:
       begin
-        fp := TFileStream.Create('temp.wav', fmOpenReadWrite);
+        fp := TFileStream.Create('temp.wav',fmOpenReadWrite);
         try
           fp.ReadBuffer(wh, SizeOf(wh));
           ListBox1.Items.Clear;
@@ -122,9 +123,10 @@ begin
           if (wh.hdrWave = 'AVI ') and
             (MessageDlg('repaire?', TMsgDlgType.mtConfirmation,
             [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) = mrOK) then
-            repair(fp, sp);
+            repair(fp);
         finally
-          fp.Free;
+          if fp = nil then
+            fp.Free;
         end;
       end;
     2:
@@ -200,6 +202,11 @@ end;
 
 procedure TForm1.RecordButtonClick(Sender: TObject);
 begin
+  if RecordButton.IsPressed = false then
+  begin
+    RecordButton.HitTest:=false;
+    Exit;
+  end;
   if Mic <> nil then
   begin
     Mic.StartCapture;
@@ -208,25 +215,26 @@ begin
   end;
 end;
 
-procedure TForm1.repair(fp: TFileStream; sp: SpParam);
+procedure TForm1.repair(fp: TFileStream);
 var
   s: TMemoryStream;
+  sp: SpParam;
   i: integer;
 begin
   sp.channels := 2;
-  sp.samplePerSec := 44100;
-  sp.bytesPerSec := 176400;
   sp.bitsPerSample := 16;
-  fp.Position:=28;
-  fp.ReadBuffer(i,4);
-  fp.Position:=i;
-  sp.sizeOfData:=fp.Size-fp.Position;
+  fp.Position:=88;
+  fp.ReadBuffer(sp.samplePerSec,4);
+  fp.ReadBuffer(i, 4);
+  sp.samplePerSec:=sp.samplePerSec div i;
+  fp.Position:=156;
+  sp.sizeOfData:=fp.Size - fp.Position;
   s:=TMemoryStream.Create;
   try
     waveHeaderWrite(s,sp);
     s.CopyFrom(fp,sp.sizeOfData);
     fp.Position:=0;
-    fp.WriteBuffer(s.Memory,s.Size);
+    fp.WriteBuffer(s.Memory^,s.Size);
   finally
     s.Free;
   end;
