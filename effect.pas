@@ -22,7 +22,6 @@ var
   pMem, pCpy, pRes: array of Int16;
   s: TMemoryStream;
   r: array of Single;
-  bytes: array of Byte;
 begin
   result := 0;
   try
@@ -76,13 +75,13 @@ begin
       inc(offset1, p + q);
     end;
     pitch := 1.5;
-    len := trunc(len / pitch);
-    for i := 0 to len - 1 do
+    temp_size:=trunc(len / pitch);
+    for i := 0 to temp_size - 1 do
     begin
       m := pitch * i;
       q := trunc(m);
       for a := q - j div 2 to q + j div 2 do
-        if (a >= 0) and (a < len) then
+        if (a >= 0) and (a < temp_size) then
           pMem[i] := pCpy[a] + pRes[a] * trunc(sinc(pi * (m - a)))
         else
           pMem[i] := 0;
@@ -93,8 +92,7 @@ begin
   s := TMemoryStream.Create;
   try
     s.WriteBuffer(sp.pWav^, sp.posOfData);
-    bytes:=Pointer(pMem);
-    s.WriteBuffer(bytes[sp.posOfData], sp.sizeOfData);
+    s.WriteBuffer(Pointer(pMem)^, len);
     s.Position := 0;
     s.ReadBuffer(sp.pWav^, s.Size);
   finally
