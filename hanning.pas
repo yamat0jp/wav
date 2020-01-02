@@ -147,6 +147,7 @@ var
   p: PByte;
   i, j, k: integer;
   m: UInt16;
+  n: Single;
 begin
   mono_wave_read(pcm, filename);
   s := TMemoryStream.Create;
@@ -163,12 +164,13 @@ begin
     begin
       for j := i to i + pcm.length do
       begin
-        if pcm.s[j] > 65530.0 then
+        n := pcm.s[j] / 2.0 * 65530.0;
+        if n > 65530.0 then
           m := 65535
-        else if pcm.s[j] < 0.0 then
+        else if n < 0.0 then
           m := 0
         else
-          m := Round(pcm.s[j]);
+          m := Round(n);
         s.WriteBuffer(m, SizeOf(UInt16));
       end;
       inc(i, pcm.length div 2);
