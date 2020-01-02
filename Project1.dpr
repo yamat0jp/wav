@@ -9,7 +9,8 @@ uses
   wav in 'wav.pas',
   selectFile in 'selectFile.pas',
   WriteHeader in 'WriteHeader.pas',
-  common in 'common.pas';
+  common in 'common.pas',
+  hanning in 'hanning.pas';
 
 {$R *.res}
 

@@ -23,7 +23,7 @@ begin
     s := TStringList.Create;
     s.Add('データ形式：' + waveFmtPcm.formatTag.ToString);
     s.Add('チャンネル数：' + waveFmtPcm.channels.ToString);
-    s.Add('サンプリング周波数：' + waveFmtPcm.sampleParSec.ToString);
+    s.Add('サンプリング周波数：' + waveFmtPcm.samplePerSec.ToString);
     s.Add('バイト数　/　秒：' + waveFmtPcm.bytesPerSec.ToString);
     s.Add('バイト数 Ｘ チャンネル数：' + waveFmtPcm.blockAlign.ToString);
     s.Add('ビット数　/　サンプル：' + waveFmtPcm.bitsPerSample.ToString);
@@ -121,7 +121,7 @@ begin
         fp.Free;
         Exit;
       end;
-      sp.samplePerSec := waveFmtPcm.sampleParSec;
+      sp.samplePerSec := waveFmtPcm.samplePerSec;
       sp.bitsPerSample := waveFmtPcm.bitsPerSample;
       sp.channels := waveFmtPcm.channels;
       sp.bytesPerSec := waveFmtPcm.bytesPerSec;

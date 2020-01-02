@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 480
+  ClientHeight = 506
   ClientWidth = 400
   FormFactor.Width = 320
   FormFactor.Height = 480
@@ -173,5 +173,12 @@ object Form1: TForm1
     OnTimer = Timer1Timer
     Left = 336
     Top = 368
+  end
+  object Edit1: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 21
+    Text = 'myfile.wav'
+    Position.X = 24.000000000000000000
+    Position.Y = 464.000000000000000000
   end
 end

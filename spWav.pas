@@ -17,7 +17,7 @@ type
   tWaveFormatPcm = packed record
     formatTag: UInt16;
     channels: UInt16;
-    sampleParSec: UInt32;
+    samplePerSec: UInt32;
     bytesPerSec: UInt32;
     blockAlign: UInt16;
     bitsPerSample: UInt16;

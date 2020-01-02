@@ -2,7 +2,7 @@ unit hanning;
 
 interface
 
-uses System.Classes, System.SysUtils;
+uses System.Classes, System.SysUtils, spWav;
 
 type
   TMONO_PCM = record
@@ -21,11 +21,13 @@ procedure hanning_window(out pcm: TMONO_PCM; n: integer);
 procedure mono_wave_read(out pcm: TMONO_PCM; filename: string);
 procedure mono_wave_write(pcm: TMONO_PCM; filename: string);
 procedure dft(const pcm: TMONO_PCM; out dft: TDFT);
-procedure timeStretch(const cut_wid: Single=0.06; cross_wid: Single=0.03);
+procedure timeStretch(const filename: string; const cut_wid: Single = 0.06;
+  const cross_wid: Single = 0.03);
+procedure readFs(data: tWaveFormatPcm; var pcm: TMONO_PCM);
 
 implementation
 
-uses spWav, WriteHeader;
+uses WriteHeader;
 
 procedure hanning_window(out pcm: TMONO_PCM; n: integer);
 var
@@ -42,14 +44,13 @@ end;
 
 procedure mono_wave_read(out pcm: TMONO_PCM; filename: string);
 var
-  s: TFileStream;
-  t: TMemoryStream;
+  s: TMemoryStream;
   i: integer;
   data: UInt16;
 begin
-  s := TFileStream.Create(filename, fmOpenRead);
-  t := TMemoryStream.Create;
+  s := TMemoryStream.Create;
   try
+    s.LoadFromFile(filename);
     s.Position := 24;
     s.ReadBuffer(pcm.fs, 4);
     s.Position := s.Position + 6;
@@ -59,16 +60,13 @@ begin
     s.ReadBuffer(pcm.length, 4);
     pcm.length := pcm.length div 2;
     SetLength(pcm.s, pcm.length);
-    t.CopyFrom(s, pcm.length);
-    t.Position := 0;
     for i := 0 to pcm.length div 2 - 1 do
     begin
-      t.ReadBuffer(data, 2);
+      s.ReadBuffer(data, 2);
       pcm.s[i] := data / 32768.0;
     end;
   finally
     s.Free;
-    t.Free;
   end;
 end;
 
@@ -139,9 +137,70 @@ begin
   Finalize(x_image);
 end;
 
-procedure timeStretch(const cut_wid: Single=0.06; cross_wid: Single=0.03);
+procedure timeStretch(const filename: string; const cut_wid: Single = 0.06;
+  const cross_wid: Single = 0.03);
+var
+  cut_num, cross_num: integer;
+  s, s1: TMemoryStream;
+  pcm: TMONO_PCM;
+  header: WrSWaveFileHeader;
+  p: PByte;
+  buffer: array of Byte;
+  i: integer;
 begin
+  s := TMemoryStream.Create;
+  s1 := TMemoryStream.Create;
+  try
+    s.LoadFromFile(filename);
+    s.ReadBuffer(header, SizeOf(WrSWaveFileHeader));
+    p := s.Memory;
+    pcm.s := Pointer(p + s.Position);
+    pcm.length := header.sizeOfData div 2;
+    readFs(header.stWaveFormat, pcm);
+    SetLength(buffer, pcm.fs div 2);
+    cut_num := Round(cut_wid * pcm.fs);
+    cross_num := Round(cross_wid * pcm.fs);
+    s1.CopyFrom(s, s.Size - s.Position);
+    s.Position:=SizeOf(WrSWaveFileHeader);
+    s1.Position := 0;
+    for i := 0 to pcm.length * 2 div pcm.fs do
+    begin
+      s1.ReadBuffer(Pointer(buffer)^, length(buffer));
+      s1.Position := s1.Position - length(buffer) div 2;
+      s.WriteBuffer(Pointer(buffer)^, length(buffer));
+    end;
+    s.SaveToFile('myfile.wav');
+  finally
+    s.Free;
+    s1.Free;
+    Finalize(pcm.s);
+    Finalize(buffer);
+  end;
+end;
 
+procedure readFs(data: tWaveFormatPcm; var pcm: TMONO_PCM);
+var
+  ma: Single;
+  i, a, b, p, pmax, pmin: integer;
+  temp: Extended;
+begin
+  ma := 0.0;
+  i := trunc(data.bitsPerSample * data.bitsPerSample * data.channels * 0.01);
+  pmin := trunc(data.samplePerSec * data.bitsPerSample * data.channels * 0.005);
+  pmax := trunc(data.samplePerSec * data.bitsPerSample * data.channels * 0.02);
+  p := pmin;
+  for b := 0 to pmax - pmin - 1 do
+  begin
+    temp := 0.0;
+    for a := 0 to i - 1 do
+      temp := temp + pcm.s[a] * pcm.s[a + b];
+    if temp > ma then
+    begin
+      ma := temp;
+      p := b;
+    end;
+  end;
+  pcm.fs := p;
 end;
 
 end.

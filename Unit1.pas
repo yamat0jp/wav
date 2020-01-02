@@ -7,7 +7,7 @@ uses
   System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
   FMX.Media, FMX.Layouts, FMX.Objects, FMX.ListBox, spWav,
-  FMX.Controls.Presentation;
+  FMX.Controls.Presentation, FMX.Edit;
 
 type
   TForm1 = class(TForm)
@@ -31,6 +31,7 @@ type
     ListBox1: TListBox;
     ComboBox1: TComboBox;
     Timer1: TTimer;
+    Edit1: TEdit;
     procedure PauseButtonClick(Sender: TObject);
     procedure StartButtonClick(Sender: TObject);
     procedure StopButtonClick(Sender: TObject);
@@ -55,7 +56,7 @@ implementation
 
 {$R *.fmx}
 
-uses wav, effect, selectFile, WriteHeader, common;
+uses wav, effect, selectFile, WriteHeader, common, hanning;
 
 procedure TForm1.StartButtonClick(Sender: TObject);
 begin
@@ -89,6 +90,8 @@ var
 begin
   case ComboBox1.ItemIndex of
     0:
+      timeStretch('ex2_2.wav');
+      {
       begin
         Mic.FileName:='temp.wav';
         if FileExists(Mic.FileName) = false then
@@ -112,9 +115,10 @@ begin
         end;
         pMem.Free;
       end;
+      }
     1:
       begin
-        fp := TFileStream.Create('temp.wav',fmOpenReadWrite);
+        fp := TFileStream.Create(Edit1.Text,fmOpenReadWrite);
         try
           fp.ReadBuffer(wh, SizeOf(wh));
           ListBox1.Items.Clear;
@@ -132,7 +136,7 @@ begin
       end;
     2:
       begin
-        fp := TFileStream.Create('temp.wav', fmOpenRead);
+        fp := TFileStream.Create(Edit1.Text, fmOpenRead);
         try
           readFmtChunk(fp, wf, s);
         finally
@@ -142,7 +146,7 @@ begin
       end;
     3:
     begin
-      wave:=TSpWave.Create('sample.wav',fmCreate);
+      wave:=TSpWave.Create(Edit1.Text,fmCreate);
       try
         wave.main('10 20000');
       finally
