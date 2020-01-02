@@ -90,7 +90,8 @@ begin
   case ComboBox1.ItemIndex of
     0:
       begin
-        if FileExists('temp.wav') = false then
+        Mic.FileName:='temp.wav';
+        if FileExists(Mic.FileName) = false then
           Exit;
         i := wavHdrRead(PChar(Mic.FileName), sp, s);
         ListBox1.Items.Text := s;
@@ -234,7 +235,7 @@ begin
     waveHeaderWrite(s,sp);
     s.CopyFrom(fp,sp.sizeOfData);
     fp.Position:=0;
-    fp.WriteBuffer(s.Memory^,s.Size);
+    fp.CopyFrom(s,0);
   finally
     s.Free;
   end;

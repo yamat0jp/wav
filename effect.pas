@@ -22,6 +22,7 @@ var
   pMem, pCpy, pRes: array of Int16;
   s: TMemoryStream;
   r: array of Single;
+  bytes: array of Byte;
 begin
   result := 0;
   try
@@ -92,7 +93,8 @@ begin
   s := TMemoryStream.Create;
   try
     s.WriteBuffer(sp.pWav^, sp.posOfData);
-    s.WriteBuffer(Pointer(pMem)^, sp.sizeOfData - sp.posOfData);
+    bytes:=Pointer(pMem);
+    s.WriteBuffer(bytes[sp.posOfData], sp.sizeOfData);
     s.Position := 0;
     s.ReadBuffer(sp.pWav^, s.Size);
   finally
