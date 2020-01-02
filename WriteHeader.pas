@@ -8,7 +8,7 @@ function waveHeaderWrite(fp: TStream; const sp: SpParam): integer;
 
 implementation
 
-uses effect;
+uses effect, hanning;
 
 function waveHeaderWrite(fp: TStream; const sp: SpParam): integer;
 var
@@ -24,9 +24,9 @@ begin
   s.channels:=sp.channels;
   s.sampleParSec:=sp.samplePerSec;
   s.formatTag := 1;
-  bytes := sp.bitsPerSample div 8;
-  s.bytesPerSec := bytes * sp.channels * sp.samplePerSec;
-  s.blockAlign := bytes * sp.channels;
+  bytes := sp.bitsPerSample;
+  s.bytesPerSec := bytes * sp.channels * sp.samplePerSec div 8;
+  s.blockAlign := bytes * sp.channels div 8;
   s.bitsPerSample := sp.bitsPerSample;
   wrWavHdr.stWaveFormat := s;
   wrWavHdr.hdrData := STR_data;

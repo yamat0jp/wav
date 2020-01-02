@@ -9,6 +9,9 @@
         <Projects Include="Project1.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="lesson.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="Project1:Make">
         <MSBuild Projects="Project1.dproj" Targets="Make"/>
     </Target>
+    <Target Name="lesson">
+        <MSBuild Projects="lesson.dproj"/>
+    </Target>
+    <Target Name="lesson:Clean">
+        <MSBuild Projects="lesson.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="lesson:Make">
+        <MSBuild Projects="lesson.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="changer;Project1"/>
+        <CallTarget Targets="changer;Project1;lesson"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="changer:Clean;Project1:Clean"/>
+        <CallTarget Targets="changer:Clean;Project1:Clean;lesson:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="changer:Make;Project1:Make"/>
+        <CallTarget Targets="changer:Make;Project1:Make;lesson:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
