@@ -141,58 +141,55 @@ procedure timeStretch(const filename: string; const cut_wid: Single = 0.06;
   const cross_wid: Single = 0.03);
 var
   cut_num, cross_num: integer;
-  s, s1: TMemoryStream;
+  s: TMemoryStream;
   pcm: TMONO_PCM;
   header: WrSWaveFileHeader;
   p: PByte;
-  buffer: array of Byte;
   i: integer;
+  m: UInt16;
 begin
+  mono_wave_read(pcm, filename);
   s := TMemoryStream.Create;
-  s1 := TMemoryStream.Create;
   try
     s.LoadFromFile(filename);
     s.ReadBuffer(header, SizeOf(WrSWaveFileHeader));
-    p := s.Memory;
-    pcm.s := Pointer(p + s.Position);
-    pcm.length := header.sizeOfData div 2;
+    mono_wave_read(pcm, filename);
     readFs(header.stWaveFormat, pcm);
-    SetLength(buffer, pcm.fs div 2);
     cut_num := Round(cut_wid * pcm.fs);
     cross_num := Round(cross_wid * pcm.fs);
-    s1.CopyFrom(s, s.Size - s.Position);
-    s.Position:=SizeOf(WrSWaveFileHeader);
-    s1.Position := 0;
-    for i := 0 to pcm.length * 2 div pcm.fs do
+    for i := 0 to pcm.length div 2 - 1 do
     begin
-      s1.ReadBuffer(Pointer(buffer)^, length(buffer));
-      s1.Position := s1.Position - length(buffer) div 2;
-      s.WriteBuffer(Pointer(buffer)^, length(buffer));
+      if pcm.s[i] > 65530 then
+        m := 65535
+      else if pcm.s[i] < 0 then
+        m := 0
+      else
+        m := Round(pcm.s[i]);
+      s.WriteBuffer(m, SizeOf(UInt18));
     end;
     s.SaveToFile('myfile.wav');
   finally
     s.Free;
-    s1.Free;
     Finalize(pcm.s);
-    Finalize(buffer);
   end;
 end;
 
 procedure readFs(data: tWaveFormatPcm; var pcm: TMONO_PCM);
 var
   ma: Single;
-  i, a, b, p, pmax, pmin: integer;
+  a, b, p, pmax, pmin: integer;
   temp: Extended;
 begin
   ma := 0.0;
-  i := trunc(data.bitsPerSample * data.bitsPerSample * data.channels * 0.01);
+  pcm.length := trunc(data.samplePerSec *
+    data.bitsPerSample div data.channels * 0.01);
   pmin := trunc(data.samplePerSec * data.bitsPerSample * data.channels * 0.005);
   pmax := trunc(data.samplePerSec * data.bitsPerSample * data.channels * 0.02);
   p := pmin;
   for b := 0 to pmax - pmin - 1 do
   begin
     temp := 0.0;
-    for a := 0 to i - 1 do
+    for a := 0 to pcm.length - 1 do
       temp := temp + pcm.s[a] * pcm.s[a + b];
     if temp > ma then
     begin
