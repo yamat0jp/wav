@@ -90,7 +90,7 @@ var
 begin
   case ComboBox1.ItemIndex of
     0:
-      timeStretch('ex2_2.wav');
+      timeStretch(Edit1.Text);
       {
       begin
         Mic.FileName:='temp.wav';

@@ -145,7 +145,7 @@ var
   pcm: TMONO_PCM;
   header: WrSWaveFileHeader;
   p: PByte;
-  i: integer;
+  i, j, k: integer;
   m: UInt16;
 begin
   mono_wave_read(pcm, filename);
@@ -157,15 +157,21 @@ begin
     readFs(header.stWaveFormat, pcm);
     cut_num := Round(cut_wid * pcm.fs);
     cross_num := Round(cross_wid * pcm.fs);
-    for i := 0 to pcm.length div 2 - 1 do
+    i := 0;
+    k:= header.sizeOfData div header.stWaveFormat.channels div 2;
+    while i < k do
     begin
-      if pcm.s[i] > 65530 then
-        m := 65535
-      else if pcm.s[i] < 0 then
-        m := 0
-      else
-        m := Round(pcm.s[i]);
-      s.WriteBuffer(m, SizeOf(UInt18));
+      for j := i to i + pcm.length do
+      begin
+        if pcm.s[j] > 65530.0 then
+          m := 65535
+        else if pcm.s[j] < 0.0 then
+          m := 0
+        else
+          m := Round(pcm.s[j]);
+        s.WriteBuffer(m, SizeOf(UInt16));
+      end;
+      inc(i, pcm.length div 2);
     end;
     s.SaveToFile('myfile.wav');
   finally

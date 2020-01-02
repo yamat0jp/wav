@@ -177,7 +177,7 @@ object Form1: TForm1
   object Edit1: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     TabOrder = 21
-    Text = 'myfile.wav'
+    Text = 'ex2_2.wav'
     Position.X = 24.000000000000000000
     Position.Y = 464.000000000000000000
   end
