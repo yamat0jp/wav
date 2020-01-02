@@ -21,6 +21,7 @@ procedure hanning_window(out pcm: TMONO_PCM; n: integer);
 procedure mono_wave_read(out pcm: TMONO_PCM; filename: string);
 procedure mono_wave_write(pcm: TMONO_PCM; filename: string);
 procedure dft(const pcm: TMONO_PCM; out dft: TDFT);
+procedure timeStretch(const cut_wid: Single=0.06; cross_wid: Single=0.03);
 
 implementation
 
@@ -136,6 +137,11 @@ begin
   Finalize(han.s);
   Finalize(x_real);
   Finalize(x_image);
+end;
+
+procedure timeStretch(const cut_wid: Single=0.06; cross_wid: Single=0.03);
+begin
+
 end;
 
 end.
