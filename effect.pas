@@ -6,7 +6,6 @@ uses System.Classes, System.SysUtils, Math, spWav;
 
 function effect16BitWav(const sp: SpParam): integer;
 function sinc(x: Single): Single;
-function effectwav(const sp: SpParam): integer;
 
 implementation
 
@@ -110,17 +109,6 @@ begin
     result := 1.0
   else
     result := sin(x) / x;
-end;
-
-function effectwav(const sp: SpParam): integer;
-begin
-  if sp.channels = 1 then
-  begin
-    Form2.ListBox1.Items.Add('ステレオファイルにしてください');
-    result := -1;
-  end
-  else
-    result := effect16BitWav(sp);
 end;
 
 end.

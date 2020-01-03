@@ -29,12 +29,14 @@ begin
     s.Add('ビット数　/　サンプル：' + waveFmtPcm.bitsPerSample.ToString);
     with waveFmtPcm do
     begin
+      {
       if channels <> 2 then
       begin
         s.Add('ステレオファイルを対象としています');
         s.Add('チャンネル数は' + channels.ToString);
         result := -1;
       end;
+      }
       if formatTag <> 1 then
       begin
         s.Add('無圧縮のPCMのみ対象');

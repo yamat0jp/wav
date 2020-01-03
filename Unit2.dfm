@@ -26,7 +26,7 @@ object Form2: TForm2
   object MediaPlayer1: TMediaPlayer
     Left = 136
     Top = 120
-    Width = 113
+    Width = -3
     Height = 30
     VisibleButtons = [btPlay, btPause, btStop, btRecord]
     AutoOpen = True

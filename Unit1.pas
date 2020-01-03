@@ -99,7 +99,7 @@ begin
         if readWav('myfile.wav', pMem) = false then
           Exit;
         sp.pWav := pMem.Memory;
-        if effectWav(sp) = 0 then
+        if effect16bitWav(sp) = 0 then
         begin
           pMem.SaveToFile('effect.wav');
           SaveDialog1.Filter := Mic.FilterString;

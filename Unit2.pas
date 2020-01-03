@@ -62,7 +62,7 @@ begin
   if readWav(fileName, pMem) = false then
     Exit;
   sp.pWav := pMem.Memory;
-  if effectWav(sp) = 0 then
+  if effect16bitWav(sp) = 0 then
   begin
     pMem.SaveToFile('effect.wav');
     if SaveDialog1.Execute = true then
