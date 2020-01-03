@@ -200,9 +200,9 @@ begin
   for b := 0 to pmax - pmin - 1 do
   begin
     temp := 0.0;
-    for a := 0 to pcm.length - 1 do
+    for a := 0 to pcm.length div 2 - 1 do
       temp := temp + pcm.s[a] * pcm.s[a + b];
-    if temp > ma then
+    if (b > 0)and(temp > ma) then
     begin
       ma := temp;
       p := b;
