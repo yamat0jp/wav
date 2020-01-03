@@ -90,17 +90,13 @@ var
 begin
   case ComboBox1.ItemIndex of
     0:
-      timeStretch(Edit1.Text);
-      {
       begin
-        Mic.FileName:='temp.wav';
-        if FileExists(Mic.FileName) = false then
-          Exit;
-        i := wavHdrRead(PChar(Mic.FileName), sp, s);
+        timeStretch(Edit1.Text);
+        i := wavHdrRead(PChar('myfile.wav'), sp, s);
         ListBox1.Items.Text := s;
         if i < 0 then
           Exit;
-        if readWav(Mic.FileName, pMem) = false then
+        if readWav('myfile.wav', pMem) = false then
           Exit;
         sp.pWav := pMem.Memory;
         if effectWav(sp) = 0 then
@@ -115,10 +111,9 @@ begin
         end;
         pMem.Free;
       end;
-      }
     1:
       begin
-        fp := TFileStream.Create(Edit1.Text,fmOpenReadWrite);
+        fp := TFileStream.Create(Edit1.Text, fmOpenReadWrite);
         try
           fp.ReadBuffer(wh, SizeOf(wh));
           ListBox1.Items.Clear;
@@ -145,14 +140,14 @@ begin
         ListBox1.Items.Text := s;
       end;
     3:
-    begin
-      wave:=TSpWave.Create(Edit1.Text,fmCreate);
-      try
-        wave.main('10 20000');
-      finally
-        wave.Free;
+      begin
+        wave := TSpWave.Create(Edit1.Text, fmCreate);
+        try
+          wave.main('10 20000');
+        finally
+          wave.Free;
+        end;
       end;
-    end;
   end;
 end;
 
@@ -209,7 +204,7 @@ procedure TForm1.RecordButtonClick(Sender: TObject);
 begin
   if RecordButton.IsPressed = false then
   begin
-    RecordButton.HitTest:=false;
+    RecordButton.HitTest := false;
     Exit;
   end;
   if Mic <> nil then
@@ -228,18 +223,18 @@ var
 begin
   sp.channels := 2;
   sp.bitsPerSample := 16;
-  fp.Position:=88;
-  fp.ReadBuffer(sp.samplePerSec,4);
+  fp.Position := 88;
+  fp.ReadBuffer(sp.samplePerSec, 4);
   fp.ReadBuffer(i, 4);
-  sp.samplePerSec:=sp.samplePerSec div i;
-  fp.Position:=156;
-  sp.sizeOfData:=fp.Size - fp.Position;
-  s:=TMemoryStream.Create;
+  sp.samplePerSec := sp.samplePerSec div i;
+  fp.Position := 156;
+  sp.sizeOfData := fp.Size - fp.Position;
+  s := TMemoryStream.Create;
   try
-    waveHeaderWrite(s,sp);
-    s.CopyFrom(fp,sp.sizeOfData);
-    fp.Position:=0;
-    fp.CopyFrom(s,0);
+    waveHeaderWrite(s, sp);
+    s.CopyFrom(fp, sp.sizeOfData);
+    fp.Position := 0;
+    fp.CopyFrom(s, 0);
   finally
     s.Free;
   end;
