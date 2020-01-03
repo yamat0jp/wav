@@ -28,7 +28,7 @@ procedure readFs(data: tWaveFormatPcm; var pcm: TMONO_PCM);
 
 implementation
 
-uses WriteHeader;
+uses WriteHeader, wav;
 
 procedure hanning_window(out pcm: TMONO_PCM; n: integer);
 var
@@ -49,16 +49,22 @@ var
   i: integer;
   sp: SpParam;
   data: UInt16;
+  fmt: tWaveFormatPcm;
 begin
-  makeSp(sp,filename);
-  pcm.fs:=sp.samplePerSec;
-  pcm.bits:=sp.bitsPerSample;
-  pcm.length:=sp.sizeOfData div 2;
+  makeSp(sp, filename);
+  pcm.fs := sp.samplePerSec;
+  pcm.bits := sp.bitsPerSample;
+  pcm.length := sp.sizeOfData div 2;
   s := TMemoryStream.Create;
   try
     s.LoadFromFile(filename);
+    {
+      readFmtChunk(s, fmt);
+      pcm.fs:=fmt.samplePerSec;
+      pcm.bits:=fmt.bitsPerSample;
+    }
     SetLength(pcm.s, pcm.length);
-    for i := 0 to pcm.length div 2 - 1 do
+    for i := 0 to pcm.length - 1 do
     begin
       s.ReadBuffer(data, 2);
       pcm.s[i] := data / 32768.0;
@@ -76,14 +82,14 @@ var
   m: UInt16;
   sp: SpParam;
 begin
-  makeSp(sp,filename);
+  makeSp(sp, filename);
   sp.samplePerSec := pcm.fs;
   sp.bitsPerSample := pcm.bits;
   sp.sizeOfData := pcm.length * 2;
   s := TMemoryStream.Create;
   try
     waveHeaderWrite(s, sp);
-    s.Position:=sp.posOfData;
+    s.Position := sp.posOfData;
     for i := 0 to pcm.length - 1 do
     begin
       data := pcm.s[i] / 2.0 * 65536.0;
@@ -201,7 +207,7 @@ begin
     temp := 0.0;
     for a := 0 to pcm.length div 2 - 1 do
       temp := temp + pcm.s[a] * pcm.s[a + b];
-    if (b > 0)and(temp > ma) then
+    if (b > 0) and (temp > ma) then
     begin
       ma := temp;
       p := b;
@@ -213,15 +219,15 @@ end;
 procedure resample(const filename: string);
 var
   pcm: TMONO_PCM;
-  i: Integer;
+  i: integer;
   pitch: Single;
   header: WrSWaveFileHeader;
 begin
-  pitch:=4/3;
-  mono_wave_read(pcm,filename);
-  pcm.fs:=Round(pcm.fs*pitch);
-  pcm.length:=Round(pcm.length/pitch);
-  mono_wave_write(pcm,filename);
+  pitch := 4 / 3;
+  mono_wave_read(pcm, filename);
+  pcm.fs := Round(pcm.fs * pitch);
+  pcm.length := Round(pcm.length / pitch);
+  mono_wave_write(pcm, filename);
   Finalize(pcm.s);
 end;
 
