@@ -58,7 +58,6 @@ begin
     pcm.bits := data;
     s.Position := s.Position + 4;
     s.ReadBuffer(pcm.length, 4);
-    pcm.length := pcm.length div 2;
     SetLength(pcm.s, pcm.length);
     for i := 0 to pcm.length div 2 - 1 do
     begin
@@ -161,7 +160,7 @@ begin
     k := header.sizeOfData div 2;
     while i < k do
     begin
-      for j := i to i + 2 * pcm.length do
+      for j := i to i + 2 * pcm.fs do
       begin
         n := pcm.s[j] / 2.0 * 65530.0;
         if n > 65530.0 then
@@ -172,7 +171,7 @@ begin
           m := Round(n);
         s.WriteBuffer(m, SizeOf(UInt16));
       end;
-      inc(i, pcm.length);
+      inc(i, pcm.fs);
     end;
     s.Position := 0;
     s.ReadBuffer(header, SizeOf(WrSWaveFileHeader));
