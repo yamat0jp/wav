@@ -144,10 +144,9 @@ var
   s: TMemoryStream;
   pcm: TMONO_PCM;
   header: WrSWaveFileHeader;
-  p: PByte;
   i, j, k: integer;
   m: UInt16;
-  n: Single;
+  n: Extended;
 begin
   mono_wave_read(pcm, filename);
   s := TMemoryStream.Create;
@@ -159,10 +158,10 @@ begin
     cut_num := Round(cut_wid * pcm.fs);
     cross_num := Round(cross_wid * pcm.fs);
     i := 0;
-    k:= header.sizeOfData div header.stWaveFormat.channels div 2;
+    k := header.sizeOfData div 2;
     while i < k do
     begin
-      for j := i to i + pcm.length do
+      for j := i to i + 2 * pcm.length do
       begin
         n := pcm.s[j] / 2.0 * 65530.0;
         if n > 65530.0 then
@@ -173,8 +172,13 @@ begin
           m := Round(n);
         s.WriteBuffer(m, SizeOf(UInt16));
       end;
-      inc(i, pcm.length div 2);
+      inc(i, pcm.length);
     end;
+    s.Position := 0;
+    s.ReadBuffer(header, SizeOf(WrSWaveFileHeader));
+    header.sizeOfData := s.Size - s.Position;
+    s.Position := 0;
+    s.WriteBuffer(header, SizeOf(WrSWaveFileHeader));
     s.SaveToFile('myfile.wav');
   finally
     s.Free;
