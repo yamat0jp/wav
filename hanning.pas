@@ -25,6 +25,7 @@ procedure timeStretch(const filename: string; const cut_wid: Single = 0.06;
   const cross_wid: Single = 0.03);
 procedure resample(const filename: string);
 procedure readFs(data: tWaveFormatPcm; var pcm: TMONO_PCM);
+procedure mono_stereo(obj: TMemoryStream);
 
 implementation
 
@@ -47,6 +48,7 @@ procedure mono_wave_read(out pcm: TMONO_PCM; filename: string);
 var
   s: TMemoryStream;
   i: integer;
+  str: string;
   sp: SpParam;
   data: UInt16;
   fmt: tWaveFormatPcm;
@@ -54,15 +56,23 @@ begin
   makeSp(sp, filename);
   pcm.fs := sp.samplePerSec;
   pcm.bits := sp.bitsPerSample;
-  pcm.length := sp.sizeOfData div 2;
   s := TMemoryStream.Create;
   try
     s.LoadFromFile(filename);
+    // readFmtChunk(s, fmt, str);
+    if sp.channels = 2 then
+    begin
+      mono_stereo(s);
+      sp.channels := 1;
+      sp.sizeOfData := s.Size - 44;
+      waveHeaderWrite(s, sp);
+      s.SaveToFile(filename);
+    end;
     {
-      readFmtChunk(s, fmt);
       pcm.fs:=fmt.samplePerSec;
       pcm.bits:=fmt.bitsPerSample;
     }
+    pcm.length := sp.sizeOfData div 2;
     SetLength(pcm.s, pcm.length);
     for i := 0 to pcm.length - 1 do
     begin
@@ -86,6 +96,7 @@ begin
   sp.samplePerSec := pcm.fs;
   sp.bitsPerSample := pcm.bits;
   sp.sizeOfData := pcm.length * 2;
+  sp.channels := 1;
   s := TMemoryStream.Create;
   try
     waveHeaderWrite(s, sp);
@@ -165,7 +176,7 @@ begin
     k := header.sizeOfData div 2;
     while i < k do
     begin
-      for j := i to i + 2 * pcm.fs do
+      for j := i to i + pcm.fs do
       begin
         n := pcm.s[j] / 2.0 * 65530.0;
         if n > 65530.0 then
@@ -219,7 +230,6 @@ end;
 procedure resample(const filename: string);
 var
   pcm: TMONO_PCM;
-  i: integer;
   pitch: Single;
   header: WrSWaveFileHeader;
 begin
@@ -229,6 +239,26 @@ begin
   pcm.length := Round(pcm.length / pitch);
   mono_wave_write(pcm, filename);
   Finalize(pcm.s);
+end;
+
+procedure mono_stereo(obj: TMemoryStream);
+var
+  s: TMemoryStream;
+begin
+  s := TMemoryStream.Create;
+  try
+    s.CopyFrom(obj, 0);
+    s.Position := 0;
+    obj.Clear;
+    obj.CopyFrom(s, 44);
+    while s.Position < s.Size do
+    begin
+      obj.CopyFrom(s, 2);
+      s.Position := s.Position + 2;
+    end;
+  finally
+    s.Free;
+  end;
 end;
 
 end.

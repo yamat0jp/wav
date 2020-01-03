@@ -5,13 +5,13 @@ interface
 uses
   System.Classes, System.SysUtils, spWav;
 
-function readFmtChunk(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm;
+function readFmtChunk(fp: TStream; out waveFmtPcm: tWaveFormatPcm;
   out mes: string): integer;
 function wavHdrRead(wavefile: string; var sp: SpParam; out mes: string): integer;
 
 implementation
 
-function readFmtChunk(fp: TFileStream; out waveFmtPcm: tWaveFormatPcm;
+function readFmtChunk(fp: TStream; out waveFmtPcm: tWaveFormatPcm;
   out mes: string): integer;
 var
   s: TStringList;
