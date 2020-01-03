@@ -5,6 +5,7 @@ interface
 uses System.Classes, System.SysUtils, Math, spWav;
 
 function effect16BitWav(const sp: SpParam): integer;
+function effectWav(const sp: SpParam): integer;
 function sinc(x: Single): Single;
 
 implementation
@@ -101,6 +102,20 @@ begin
   Finalize(pCpy);
   Finalize(pMem);
   Finalize(r);
+end;
+
+function effectWav(const sp: SpParam): integer;
+var
+  i: Integer;
+  p, q: array of Single;
+begin
+  p:=sp.pWav;
+
+  for i := sp.posOfData to sp.sizeOfData-1 do
+  begin
+    p[i]:=p[i]+sinc(p[i])
+  end;
+  result:=0;
 end;
 
 function sinc(x: Single): Single;

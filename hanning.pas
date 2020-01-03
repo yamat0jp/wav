@@ -23,6 +23,7 @@ procedure mono_wave_write(pcm: TMONO_PCM; filename: string);
 procedure dft(const pcm: TMONO_PCM; out dft: TDFT);
 procedure timeStretch(const filename: string; const cut_wid: Single = 0.06;
   const cross_wid: Single = 0.03);
+procedure resample(const filename: string);
 procedure readFs(data: tWaveFormatPcm; var pcm: TMONO_PCM);
 
 implementation
@@ -46,18 +47,16 @@ procedure mono_wave_read(out pcm: TMONO_PCM; filename: string);
 var
   s: TMemoryStream;
   i: integer;
+  sp: SpParam;
   data: UInt16;
 begin
+  makeSp(sp,filename);
+  pcm.fs:=sp.samplePerSec;
+  pcm.bits:=sp.bitsPerSample;
+  pcm.length:=sp.sizeOfData div 2;
   s := TMemoryStream.Create;
   try
     s.LoadFromFile(filename);
-    s.Position := 24;
-    s.ReadBuffer(pcm.fs, 4);
-    s.Position := s.Position + 6;
-    s.ReadBuffer(data, 2);
-    pcm.bits := data;
-    s.Position := s.Position + 4;
-    s.ReadBuffer(pcm.length, 4);
     SetLength(pcm.s, pcm.length);
     for i := 0 to pcm.length div 2 - 1 do
     begin
@@ -77,13 +76,14 @@ var
   m: UInt16;
   sp: SpParam;
 begin
-  sp.channels := 1;
+  makeSp(sp,filename);
   sp.samplePerSec := pcm.fs;
   sp.bitsPerSample := pcm.bits;
   sp.sizeOfData := pcm.length * 2;
   s := TMemoryStream.Create;
   try
     waveHeaderWrite(s, sp);
+    s.Position:=sp.posOfData;
     for i := 0 to pcm.length - 1 do
     begin
       data := pcm.s[i] / 2.0 * 65536.0;
@@ -152,7 +152,6 @@ begin
   try
     s.LoadFromFile(filename);
     s.ReadBuffer(header, SizeOf(WrSWaveFileHeader));
-    mono_wave_read(pcm, filename);
     readFs(header.stWaveFormat, pcm);
     cut_num := Round(cut_wid * pcm.fs);
     cross_num := Round(cross_wid * pcm.fs);
@@ -209,6 +208,21 @@ begin
     end;
   end;
   pcm.fs := p;
+end;
+
+procedure resample(const filename: string);
+var
+  pcm: TMONO_PCM;
+  i: Integer;
+  pitch: Single;
+  header: WrSWaveFileHeader;
+begin
+  pitch:=4/3;
+  mono_wave_read(pcm,filename);
+  pcm.fs:=Round(pcm.fs*pitch);
+  pcm.length:=Round(pcm.length/pitch);
+  mono_wave_write(pcm,filename);
+  Finalize(pcm.s);
 end;
 
 end.

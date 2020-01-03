@@ -105,7 +105,7 @@ begin
     bitsPerSample := 16;
     sizeOfData := (bitsPerSample div 8) * channels * samplePerSec * totalLength;
   end;
-  sp := s;
+  sp:=s;
   result := 1;
 end;
 

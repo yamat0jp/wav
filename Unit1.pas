@@ -80,7 +80,6 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 var
   sp: SpParam;
-  pMem: TMemoryStream;
   s: string;
   i: integer;
   wh: WrSWaveFileHeader;
@@ -92,24 +91,9 @@ begin
     0:
       begin
         timeStretch(Edit1.Text);
-        i := wavHdrRead(PChar('myfile.wav'), sp, s);
+        resample('myfile.wav');
+        wavHdrRead(PChar('myfile.wav'), sp, s);
         ListBox1.Items.Text := s;
-        if i < 0 then
-          Exit;
-        if readWav('myfile.wav', pMem) = false then
-          Exit;
-        sp.pWav := pMem.Memory;
-        if effect16bitWav(sp) = 0 then
-        begin
-          pMem.SaveToFile('effect.wav');
-          SaveDialog1.Filter := Mic.FilterString;
-          if SaveDialog1.Execute = true then
-          begin
-            pMem.SaveToFile(SaveDialog1.FileName);
-            StartButtonClick(nil);
-          end;
-        end;
-        pMem.Free;
       end;
     1:
       begin

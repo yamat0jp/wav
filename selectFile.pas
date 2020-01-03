@@ -8,8 +8,6 @@ function readWav(const fName: string; out pMem: TMemoryStream): Boolean;
 
 implementation
 
-uses Unit2;
-
 function readWav(const fName: string; out pMem: TMemoryStream): Boolean;
 begin
   result := false;
