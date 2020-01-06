@@ -17,7 +17,6 @@ var
   bytes: Byte;
   wrWavHdr: WrSWaveFileHeader;
   s: tWaveFormatPCM;
-  m: TMemoryStream;
 begin
   wrWavHdr.hdrRiff := STR_RIFF;
   wrWavHdr.sizeOfFile := sp.sizeOfData + SizeOf(WrSWaveFileHeader) - 8;
@@ -37,20 +36,6 @@ begin
   fp.Position := 0;
   fp.WriteBuffer(wrWavHdr, SizeOf(WrSWaveFileHeader));
   fp.Size := wrWavHdr.sizeOfFile;
-  m := TMemoryStream.Create;
-  try
-    fp.Position := 0;
-    m.CopyFrom(fp, fp.Size);
-    if fp is TFileStream then
-      m.SaveToFile((fp as TFileStream).FileName)
-    else
-    begin
-      (fp as TMemoryStream).Clear;
-      fp.CopyFrom(m,0);
-    end;
-  finally
-    m.Free;
-  end;
   result := 1;
 end;
 
@@ -69,9 +54,6 @@ begin
 end;
 
 procedure makeSp(var sp: SpParam; header: WrSWaveFileHeader);
-var
-  s: tWaveFormatPCM;
-  bytes: Byte;
 begin
   sp.samplePerSec:=header.stWaveFormat.samplePerSec;
   sp.bitsPerSample:=header.stWaveFormat.bitsPerSample;

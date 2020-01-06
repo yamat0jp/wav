@@ -58,7 +58,7 @@ begin
     Exit;
   curSampling := 0;
   deltaPriod := 1;
-  for i := 0 to sp.sizeOfData div SizeOf(outdata) do
+  for i := 0 to sp.sizeOfData div 4 - 1 do
   begin
     if curSampling = 0 then
       deltaPriod := 1;

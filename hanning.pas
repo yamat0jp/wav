@@ -50,8 +50,9 @@ var
   i: integer;
   str: string;
   sp: SpParam;
-  data: UInt16;
+  data: array [0..1] of UInt16;
   fmt: tWaveFormatPcm;
+  x: Boolean;
 begin
   makeSp(sp, filename);
   pcm.fs := sp.samplePerSec;
@@ -59,25 +60,22 @@ begin
   s := TMemoryStream.Create;
   try
     s.LoadFromFile(filename);
-    // readFmtChunk(s, fmt, str);
     if sp.channels = 2 then
     begin
-      mono_stereo(s);
       sp.channels := 1;
-      sp.sizeOfData := s.Size - 44;
+      sp.sizeOfData := (s.Size - 44) div 2;
       waveHeaderWrite(s, sp);
-      s.SaveToFile(filename);
+      x:=true;
     end;
-    {
-      pcm.fs:=fmt.samplePerSec;
-      pcm.bits:=fmt.bitsPerSample;
-    }
     pcm.length := sp.sizeOfData div 2;
     SetLength(pcm.s, pcm.length);
     for i := 0 to pcm.length - 1 do
     begin
-      s.ReadBuffer(data, 2);
-      pcm.s[i] := data / 32768.0;
+      if x = true then
+        s.ReadBuffer(data, 4)
+      else
+        s.ReadBuffer(data, 2);
+      pcm.s[i] := data[0] / 32768.0;
     end;
   finally
     s.Free;
@@ -178,6 +176,8 @@ begin
     begin
       for j := i to i + pcm.fs do
       begin
+        if j > k then
+          break;
         n := pcm.s[j] / 2.0 * 65530.0;
         if n > 65530.0 then
           m := 65535
@@ -244,6 +244,8 @@ end;
 procedure mono_stereo(obj: TMemoryStream);
 var
   s: TMemoryStream;
+  data: packed array [0..1] of UInt16;
+  i: Integer;
 begin
   s := TMemoryStream.Create;
   try
@@ -251,10 +253,10 @@ begin
     s.Position := 0;
     obj.Clear;
     obj.CopyFrom(s, 44);
-    while s.Position < s.Size do
+    for i := 0 to (s.Size-44) div 4 -1 do
     begin
-      obj.CopyFrom(s, 2);
-      s.Position := s.Position + 2;
+      s.ReadBuffer(data,4);
+      obj.WriteBuffer(data[0],2);
     end;
   finally
     s.Free;
